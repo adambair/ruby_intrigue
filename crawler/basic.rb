@@ -7,7 +7,7 @@ class Crawler
   class NoUrlSpecified < StandardError; end
 
   def self.start_crawling(options={})
-    self.new(options)
+    new(options)
   end
 
   def initialize(options={})
