@@ -16,10 +16,12 @@ class MultiThreadedCrawler
     @max_depth = options[:depth]
     raise NoUrlSpecified unless @url
     puts "We're going to crawl: #{@url} with a max depth of #{@max_depth}"
+    threaded_crawl!
+  end
+
+  def threaded_crawl!
     @threads = []
-
     crawl(@url) 
-
     @threads.each{|t| t.join}
   end
 
