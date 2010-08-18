@@ -2,7 +2,6 @@ require 'rubygems'
 require 'uri'
 require 'restclient'
 require 'nokogiri'
-require File.join(File.dirname(__FILE__), "basic")
 
 class MultiThreadedCrawler
   class NoUrlSpecified < StandardError; end
