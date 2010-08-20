@@ -34,7 +34,8 @@ class MultiThreadedCrawler
       end
 
       page = Nokogiri::HTML(page_content)
-      log ("FETCHED: #{depth} - #{url} - #{page.css('title').first.content rescue ''}", depth)
+      title = page.css('title').first.content rescue ''
+      log("FETCHED: #{depth} - #{url} - #{title}", depth)
       if depth+1 <= @max_depth
         page.css('a').each do |link|
           new_url = link['href']
