@@ -46,8 +46,8 @@ class SMSServer
   
   def deliver(number, carrier, message)
     begin
-      SMSFu.deliver_sms(number,carrier,message)
-      log("Delivered \"#{message}\" to #{SMSFu.get_sms_address(number,carrier)}")
+      SMSFu.deliver(number,carrier,message)
+      log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
     rescue Errno::ECONNREFUSED => e
       log("Connection refused: " + e.message)
     rescue Exception => e
