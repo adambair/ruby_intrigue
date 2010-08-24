@@ -739,3 +739,92 @@ end
 = Lab_07
 
 * Update Asteroid#kill to handle the smashing of asteroids
+
+== Player Death
+
+Now lets handle the death of a player. First lets add in all the death/kill methods as we did before on other methods:
+
+class Player
+  def initialize
+    @alive = true
+  end
+
+  def kill
+    alive = false
+  end
+  
+  def dead?
+    !@alive
+  end
+end
+
+And handle it in our game loop... (remove the comment, replace it with @player.kill)
+
+class GameWindow < Gosu::Window
+  def draw
+    @player.draw unless @player.dead?
+  end
+
+  def detect_collisions
+    @asteroids.each do |asteroid| 
+      if collision?(asteroid, @player)
+        @player.kill
+      end
+    end
+  end
+end
+
+Asteroids just became a touch more serious. Hardcore mode is fun and all but how about we add a few lives to make the game a bit easier:
+
+class Player
+  attr_accessor :lives
+
+  def initialize(window)
+    @lives = 3
+  end
+
+  def kill
+    @lives -= 1
+    @alive = false
+    return if lives <= 0
+    warp
+  end
+
+  def warp(x=320,y=240)
+    @velocity_x = @velocity_y = @angle = 0.0
+    @x, @y = x, y
+    @alive = true
+  end
+end
+
+When a player dies, we subtract a life, then warp them back to the middle of the screen.
+    
+The last thing we need to do is display the number of lives in the game window:
+
+class GameWindow < Gosu::Window
+  def initialize
+    @life_image = Gosu::Image.new(self, "assets/ship.png", false)
+  end
+
+  def draw
+    draw_lives
+  end 
+
+  def draw_lives
+    return unless @player.lives > 0
+    x = 20
+    @player.lives.times do 
+      @life_image.draw(x, 50, 0)
+      x += 20
+    end
+  end
+end
+
+Now you should be able to display lives and have them systematically removed ;)
+
+= Lab_08
+
+* Update your game to handle player deaths.
+* Give your player 3 lives
+* Display the number of lives somewhere on the screen (text or image)
+
