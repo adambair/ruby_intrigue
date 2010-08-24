@@ -47,9 +47,65 @@ Edit game.rb to inclue the following:
   window = GameWindow.new
   window.show
 
+Calling 'super' in the 'initialize' method sets the display resolution and if it's run in fullscreen or windowed mode.
+
 Run the file:
 
   ./game.rb
 
 You should see a blank window. If you do, you're ready to go!
+
+== Gosu Callbacks (Game Loop)
+
+There are two main loops in Gosu that will provide you with the constructs in which to build a game.
+
+The first is the 'update' method. This method is called 60 times a second and is where you handle your standard game logic. This is considered the game loop.
+
+The second is the 'draw' method. This is called after each 'update' iteration and is used to 'draw' the changes on screen. It's recommended that you avoid putting logic in this method. It should only be used to draw to the screen resulting from changes in state made during the update loop.
+
+These loops will run forever until you quit the application.
+
+Add these two methods to your main game file:
+
+  # 60 times per second
+  def update
+  end
+
+  # happens immediately after each iteration of the update method
+  def draw
+  end
+
+You can see how fast these loops run if you put a 'puts' statement in the update method. Keep in mind that you're not seeing 60 'puts' a second. You're terminal may not be able to keep up and will degrade game performance. 
+
+== Images (background)
+
+== Handling Input
+
+See the documentation for a list of all possible input triggers:
+
+  http://code.google.com/p/gosu/wiki/RubyReference
+
+  if button_down? Gosu::KbH
+    puts 'pressing' if id == Gosu::KbH
+  end
+
+This will print 'pressing' the whole time the 'h' key is being pressed, or held down.
+
+There is also a method called 'button_down(id)' which is called once per key press.
+
+  def button_down(id)
+    puts 'pressed' if id == Gosu::KbH
+  end
+
+This will print 'pressed' once, even if the button is held down. This resets once the button has been released.
+
+A useful test for this is to create a button that will allow you to quit the game easily. Gosu provides the 'close' method for this very purpose. 
+
+=Lab 1
+
+* Experiment with different resolution sizes (fullscreen vs. windowed)
+* Setup and manually test the game loop (update)
+* Map a key to close the application
+
+
 
