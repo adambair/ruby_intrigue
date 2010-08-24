@@ -104,8 +104,7 @@ A useful test for this is to create a button that will allow you to quit the gam
 =Lab 1
 
 * Experiment with different resolution sizes (fullscreen vs. windowed)
+* Find a suitable image and set it as the background for the application window
 * Setup and manually test the game loop (update)
 * Map a key to close the application
-
-
 
