@@ -79,6 +79,38 @@ You can see how fast these loops run if you put a 'puts' statement in the update
 
 == Images (background)
 
+Images are the primary way we'll be displaying information on screen throughout this application. 
+
+The first most basic image is a background image. 
+
+  class GameWindow < Gosu::Window
+    def initialize
+      @background_image = Gosu::Image.new(self, "assets/background.png", true)
+    end
+  end
+
+You'll notice that Gosu::Image takes a few arguments:
+
+  The first is the window to which the image belongs
+  The second is the path to the image
+  The last is if the image is tileable 
+
+The constructor (from the docs):
+
+  # initialize(window, filename_or_rmagick_image, tileable, [srcX, srcY, srcWidth, srcHeight]) 
+
+Once you have the image stored in an instance variable, you'll need to actually display/draw it to the game window:
+
+  class GameWindow < Gosu::Window
+    def draw
+      @background_image.draw(0, 0, 0)   
+    end  
+  end
+
+Draw takes a few arguments, we're using x, y, and z coordinates.
+
+It's important to note that the game window uses Cartesian coordinates. This is how you will place objects in the window.
+
 == Handling Input
 
 See the documentation for a list of all possible input triggers:
@@ -104,7 +136,7 @@ A useful test for this is to create a button that will allow you to quit the gam
 =Lab 1
 
 * Experiment with different resolution sizes (fullscreen vs. windowed)
-* Find a suitable image and set it as the background for the application window
+* Set a background image
 * Setup and manually test the game loop (update)
 * Map a key to close the application
 
