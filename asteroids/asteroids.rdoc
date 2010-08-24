@@ -634,7 +634,108 @@ You'll notice that we're killing the projectile after it hits an Asteroid...
 = Lab_06
 
 * Create a Projectile class
-* Implement a max distance
+* Implement max distance
 * Kill the projectile after it reaches max distance
 * Remove dead projectiles from the @projectiles collection
 * Add hit detection for Projectiles vs Asteroids
+
+== Smashing Asteroids
+
+Now that we have hit detection rolling we can handle the smashing of Asteroids. There are 3 types of asteroids in Asteroids: large, medium, and small. Large asteroids smash into two medium asteroids, and the medium asteroid splits into two small asteroids. When a small asteroid is hit, it's removed from the game.
+
+The first step is to kill the asteroids that we currently have - it's going to work the same way as killing projectiles:
+
+  class Asteroid
+    def initialize(window)
+      @alive = true
+    end
+
+    def kill
+      @alive = false
+    end
+
+    def dead?
+      !@alive
+    end
+  end
+
+Then we have to kill on collision detection with a projectile then remove the dead asteroid from the current collection held in the main loop:
+
+  class GameWindow < Gosu::Window
+    def update
+      @asteroids.reject!{|asteroid| asteroid.dead?}
+    end
+
+    def detect_collisions
+      @projectiles.each do |projectile| 
+        @asteroids.each do |asteroid|
+          if collision?(projectile, asteroid)
+            projectile.kill
+            asteroid.kill
+          end
+        end
+      end
+    end
+  end
+
+Now when you shoot an asteroid it disappears, but this is only part of what we want -- now we have to smash the asteroids up in the smaller asteroids.
+
+But first we need to refactor the Asteroid class to recognize different sizes and expose the window object to the rest of the methods in the class:
+
+  class Asteroid
+    def initialize(window, size='large')
+      @window = window
+      @size = size
+      @image = Gosu::Image.new(window, "assets/asteroid-#{size}-1.png", false)
+    end
+  end
+
+We'll default to large so we don't have to go back and change our original implementation.
+
+Now we need to update the Asteroid#kill, #smash, and #setup methods to handle the breaking of asteroids:
+
+class Asteroid
+  def kill
+    @alive = false
+    smash
+  end
+
+  def smash
+    asteroids = case @size
+      when 'large'
+        speed = 2
+        2.times.collect{Asteroid.new(@window, 'medium'}
+      when 'medium'
+        speed = 2.5
+        2.times.collect{Asteroid.new(@window, 'small'}
+      else
+        []
+    end
+    asteroids.collect {|asteroid| asteroid.setup(@x, @y, rand(0)*speed+0.5) }
+  end
+
+  def setup(x, y, speed)
+    @x, @y, @speed_modifier = x, y, speed
+    @angle = rand(360)
+    self
+  end
+end
+
+Then we need to handle the addition of new asteroids to the collection in the main loop:
+
+class GameWindow < Gosu::Window
+  def detect_collisions
+    @projectiles.each do |projectile| 
+      @asteroids.each do |asteroid|
+        if collision?(projectile, asteroid)
+          projectile.kill
+          @asteroids += asteroid.kill
+        end
+      end
+    end
+  end
+end
+
+= Lab_07
+
+* Update Asteroid#kill to handle the smashing of asteroids
