@@ -18,7 +18,7 @@ Using Ruby, we're going to learn how to build something that we can use to quick
 
 * Blasting somebody with a constant stream of text messages can end up costing them an arm and a leg.  Don't do this -- unless it's actually what you intended on doing ...
 
-== Sending SMS
+== Solutions for Sending SMS
 
 * There are several gems available that we can use for SMS delivery
 
@@ -59,7 +59,11 @@ we have the SMS e-mail address.  This very address can be used to send SMS messa
 
 This is how SMS Fu works.
 
-== Carriers
+== Installing sms_fu
+
+  sudo gem install sms_fu 
+
+== Dealing with Carriers
 
 sms_fu relies on a yaml file contains a list of carriers and their e-mail SMS addresses.  
 
@@ -74,3 +78,26 @@ sms_fu relies on a yaml file contains a list of carriers and their e-mail SMS ad
 You can edit this sms_fu.yml file and add your own carriers in the same format.  SMS Fu currently supports a large list of carriers within the US and Internationally.
 
 Some International carriers actually make this e-mail to SMS solution a paid feature.  So, if you plan on sending text messages to anybody that's in a situation like this, make sure that they know that they might have to subscribe to an e-mail to SMS solution with their carrier.
+
+== Reply-To/From Address
+
+Well, since it is an e-mail, we will have to specify an e-mail address that can receive back replies.  Often, messages will appear on phones from random numbers.  Even though this is the case, if you reply back to these text messages, they will go back to the reply-to address specified in the e-mail used to deliver the outbound SMS.
+
+  config:
+    from_address:noreply@domain.com
+    
+By default, this is what sms_fu.yml has set for the reply-to address.  This can be modified in sms_fu.yml but can also be overridden when we deliver an SMS -- which is what we'll do in a later example.
+
+== Delivering SMS Messages
+
+Here's the exciting part.  Below is how you use sms_fu to send a basic text message.
+
+  SMSFu.deliver(“5558675309”, “at&t”, “hello”)
+  
+Adding a custom from address?
+
+  SMSFu.deliver(“5558675309”, “at&t”, “hello”, :from => “sms-replys@mydomain.com”)
+
+Need to impost limits to make sure messages are properly truncated?
+
+  SMSFu.deliver(“5558675309”, “at&t”, “hello”, :limit => 128)
