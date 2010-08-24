@@ -33,7 +33,7 @@ ActionMailer::Base.smtp_settings = {
    :password => "password",
    :enable_starttls_auto => true }
 
-class SMSServer
+class SMSDispatcher
   def self.send(options = {})
     new(options)
   end
@@ -60,7 +60,7 @@ class SMSServer
   end
 end
 
-SMSServer.send(
+SMSDispatcher.send(
   :number => ARGV[0], 
   :carrier => ARGV[1], 
   :message => ARGV[2]

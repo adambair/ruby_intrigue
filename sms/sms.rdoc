@@ -1,0 +1,41 @@
+= Building an SMS Server
+
+Using Ruby, we're going to learn how to build something that we can use to quickly send SMS messages.
+
+== Why SMS?
+
+* Usage is exploding in the states.  Many people would rather communicate this way rather than actually talking.  It's quick and it's impersonal and it's great for quickly notifying people.  
+
+* Supported by almost all mobile phones.  If your phone doesn't support SMS then I think its time you purchase a new phone and get rid of your slap bracelet collection.
+
+== SMS Limitations
+
+* Not everybody has a smart phone.  Text messages should be no more than 160 characters.
+
+* Blasting somebody with a constant stream of text messages can end up costing them an arm and a leg.  Don't do this -- unless it's actually what you intended on doing ...
+
+== Sending SMS
+
+* There are several gems available that we can use for SMS delivery
+
+* Not all of them are completely free solutions
+
+* Clickatell is a very popular SMS gateway.  If you have an account there and don't mind paying per message sent, this is the best solution for you.  
+
+* SMS Fu is a free solution that uses e-mail to SMS as a means to deliver free messages.
+
+== SMS Fu
+
+* SMS Fu allows for free outbound SMS.  
+
+* It's available as a gem and it's really easy to use.  Too easy.
+
+* It relies on e-mail to SMS to deliver messages.
+
+== Problems with SMS Fu
+
+* One of the biggest problems with SMS Fu is that you need to know your recipient's carrier.  Unlike Clickatell, you actually have to pass in the carrier name to send a text message.
+
+* There are many supported carriers but not as much as Clickatell.
+
+* It needs to use ActionMailer to deliver text messages.
