@@ -39,3 +39,18 @@ Using Ruby, we're going to learn how to build something that we can use to quick
 * There are many supported carriers but not as much as Clickatell.
 
 * It needs to use ActionMailer to deliver text messages.
+
+== How Does it Work?
+
+Say we have a phone number we want to send a text message to.  
+
+We know this individual's number is 555-867-5309 and that they're using AT&T.  
+
+If we've ever e-mailed ourselves using SMS we can see that a message from them will come from:
+
+  5558675309@txt.att.net
+  
+We can easily break this down now.  We have the number at the front and at the end of the address 
+we have the SMS e-mail address.  This very address can be used to send SMS messages to them as well.
+
+This is how SMS Fu works.
