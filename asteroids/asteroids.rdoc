@@ -429,7 +429,7 @@ Now, if everything has gone according to plan, we should have a lone asteroid th
 * Spawn a SINGLE asteroid in a random location in the game window
 * Spawn MULTIPLE asteroids in random locations in the game window
 
-== Simple Collision Detection (Player vs Asteroid)
+== Collision Detection
 
 Now that we can control the player and we have random moving asteroids -- we can talk about collision detection (also called hit detection).
 
@@ -495,5 +495,146 @@ PHEW! That's heavy. Let's see if everyone is on board ;)
 * Create a hitbox method and add it to both Player and Asteroid
 * Create a GameWindow#collision? method that will compare two object's hitboxes
 * Create a GameWindow#detect_collisions method that will iterate through @asteroids to see if there has been a collision with the @player
-* Print out 'kaboom' or 'oblivion' in the console if a collision occured 
+* Print out 'kaboom' or 'oblivion' in the console if a collision occurred 
 
+== Projectiles
+
+We have a Player, we have Asteroids, we have Collision Detection... now we need Projectiles. Mmmm, the fun part.
+
+Yes, lets create the files to hold our projectiles:
+
+  touch lib/projectile.rb
+
+And set it up with the standard accoutrements:
+
+  class Projectile
+    def initialize(window, origin_object)
+      @x, @y = origin_object.x, origin_object.y
+      @angle = origin_object.angle
+      @speed_modifier = 7
+      @image = Gosu::Image(window, 'assets/projectlie.png', false)
+    end
+
+    def draw
+      @image.draw_rot(@x, @y, 1, @angle)
+    end
+
+    def move
+      @x += @speed_modifier*Math.sin(Math::PI/180*@angle)
+      @y += -@speed_modifier*Math.cos(Math::PI/180*@angle)
+      @x %= 640
+      @y %= 480
+    end
+
+    def hitbox
+      hitbox_x = ((@x - @image.width/2).to_i..(@x + @image.width/2.to_i)).to_a
+      hitbox_y = ((@y - @image.width/2).to_i..(@y + @image.width/2).to_i).to_a
+      {:x => hitbox_x, :y => hitbox_y}
+    end
+  end
+
+Yeah, starting to notice a pattern here. Extractions should be made, but we can save that for later (hitbox, move, draw, etc -- are the same across multiple object, ripe for refactoring).
+
+The only thing special going on here is the 'origin_object' in the initialize method definition. This is so we can tell where to start the projectile's path. As you can see, we need to expose a few methods on the 'origin_object'.
+
+Expose x, y, angle, on the Player class:
+
+  class Player
+    attr_accessor :x, :y, :angle
+  end
+
+Now let's hook this up to the space button and add the appropriate containers:
+
+  class GameWindow < Gosu::Window
+
+    def initialize
+      @projectiles = []
+    end
+
+    def update
+      @projectiles.each {|projectile| projectile.move}
+    end
+
+    def draw
+      @projectiles.each {|projectile| projectile.draw}
+    end
+
+    def button_down(id)
+      if id == Gosu::KbSpace
+        @projectiles << Projectile.new(self, @player)
+      end
+    end
+  end
+
+Okay, now you should be able to spawn projectiles... but they never disappear, this is a problem. Let's fix that by implementing a max travel distance.
+
+  class Projectile
+    def initialize(window, origin_object)
+      @distance_traveled, @max_distance = 0, 50
+    end
+    
+    def move
+      @distance_traveled += 1
+    end
+  end
+
+Now we have a ticker that's moving up each time the game loop passes. It's more of time-to-live than a distance... but that's fine -- it works for now.
+
+The next thing we need to do is mark the projectile as dead once it's achieved it's max distance:
+
+  class Projectile
+    def initialize(window, origin_object)
+      @distance_traveled, @max_distance = 0, 50
+      @alive = true
+    end
+    
+    def move
+      @distance_traveled += 1
+      kill if @distance_traveled > @max_distance
+    end
+
+    def kill
+      @alive = false
+    end
+
+    def dead?
+      !alive
+    end
+  end
+
+You'll notice that I've added a dash of DSL to make it a bit easier to read. I've also added a convenience method Projectile#dead? -- which will be used in the main game loop.
+
+The next thing that we need to do is cleanup the @projectiles collection in the main game loop so that dead (max traveled) projectiles are removed from the window.
+
+  class GameWindow < Gosu::Window
+    def update
+      @projectiles.reject!{|projectile| projectile.dead?}
+    end
+  end  
+
+At this point you should have projectiles that disappear at a certain interval.
+
+The last part is to simply include @projectiles in GameWindow#detect_collisions
+
+  class GameWindow < Gosu::Window
+    def detect_collisions
+      @projectiles.each do |projectile| 
+        @asteroids.each do |asteroid|
+          if collision?(projectile, asteroid)
+            projectile.kill
+            puts 'hit'
+          end
+        end
+      end
+    end
+  end
+
+You'll notice that we're killing the projectile after it hits an Asteroid...
+
+= Lab_06
+
+* Create a Projectile class
+* Implement a max distance
+* Kill the projectile after it reaches max distance
+* Remove dead projectiles from the @projectiles collection
+* Add hit detection for Projectiles vs Asteroids
