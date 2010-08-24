@@ -34,15 +34,13 @@ ActionMailer::Base.smtp_settings = {
    :password => "password",
    :enable_starttls_auto => true }
 
-class SMSDispatcher
+class SMSBasic
   def self.send(options = {})
     new(options)
   end
   
   def initialize(options = {})
-    1.times do  # You can really spam somebody here *hint*
-      deliver(options[:number], options[:carrier], options[:message])
-    end
+    deliver(options[:number], options[:carrier], options[:message])
   end
   
   def deliver(number, carrier, message)

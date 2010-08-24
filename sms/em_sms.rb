@@ -57,7 +57,7 @@ EM.run do
     carrier = gets.chomp
     print "Message: "
     message = gets.chomp
-    print "Number of messages: "
+    print "Number of messages: "  # This could get dangeous
     count = gets.chomp.to_i
     puts "\n\n"
     
