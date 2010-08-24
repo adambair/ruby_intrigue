@@ -1,0 +1,13 @@
+= Building an Asteroids Clone with Gosu
+
+Using Ruby, Gosu, and pure awesomeness, we're going to build a clone of Atari's 1979 classic, Asteroids.
+
+== Install Gosu
+
+Follow the instructions for RUBY here:
+
+  http://code.google.com/p/gosu/wiki/GettingStartedOnOsx
+  http://code.google.com/p/gosu/wiki/GettingStartedOnLinux
+  http://code.google.com/p/gosu/wiki/GettingStartedOnWindows
+
+
