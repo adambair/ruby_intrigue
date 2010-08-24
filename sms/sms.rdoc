@@ -26,17 +26,17 @@ Using Ruby, we're going to learn how to build something that we can use to quick
 
 * Clickatell is a very popular SMS gateway.  If you have an account there and don't mind paying per message sent, this is the best solution for you.  
 
-* SMS Fu is a free solution that uses e-mail to SMS as a means to deliver free messages.
+* sms_fu is a free solution that uses e-mail to SMS as a means to deliver free messages.
 
-== SMS Fu
+== sms_fu
 
-* SMS Fu allows for free outbound SMS.  
+* sms_fu allows for free outbound SMS.  
 
 * It's available as a gem and it's really easy to use.  Too easy.
 
 * It relies on e-mail to SMS to deliver messages.
 
-== Problems with SMS Fu
+== Problems with sms_fu
 
 * One of the biggest problems with SMS Fu is that you need to know your recipient's carrier.  Unlike Clickatell, you actually have to pass in the carrier name to send a text message.
 
@@ -44,11 +44,11 @@ Using Ruby, we're going to learn how to build something that we can use to quick
 
 * It needs to use ActionMailer to deliver text messages.
 
-== How Does it Work?
+== Wait? Free? What? How Does it Work?
 
 Say we have a phone number we want to send a text message to.  
 
-We know this individual's number is 555-867-5309 and that they're using AT&T.  
+We know this individual's number is 555-867-5309 and that they're using AT&T judging by the nice iPhone 4 that they have that keeps on dropping calls (*ahem*).
 
 If we've ever e-mailed ourselves using SMS we can see that a message from them will come from:
 
@@ -58,3 +58,19 @@ We can easily break this down now.  We have the number at the front and at the e
 we have the SMS e-mail address.  This very address can be used to send SMS messages to them as well.
 
 This is how SMS Fu works.
+
+== Carriers
+
+sms_fu relies on a yaml file contains a list of carriers and their e-mail SMS addresses.  
+
+  at&t:
+    name:AT&T
+    value:@txt.att.net  
+  t-mobile:
+    name:T-Mobile
+    value:@tmomail.net
+  ...
+
+You can edit this sms_fu.yml file and add your own carriers in the same format.  SMS Fu currently supports a large list of carriers within the US and Internationally.
+
+Some International carriers actually make this e-mail to SMS solution a paid feature.  So, if you plan on sending text messages to anybody that's in a situation like this, make sure that they know that they might have to subscribe to an e-mail to SMS solution with their carrier.
