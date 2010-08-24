@@ -4,6 +4,8 @@ Using Ruby, Gosu, and pure awesomeness, we're going to build a clone of Atari's 
 
 This guide assumes that you're using OSX but should be approximately the same for Linux/Windows. If you're having trouble getting Gosu installed on your box, that's okay, we can pair up on machines that have a working install. TEAMWORK! :)
 
+The labs are structured as "catch-up" -- that is to say, you can follow along and the lab will essentially be what we covered, but it will give you time to explore the concepts a bit further or give you time to bring your game up to speed... or have discussions surrounding the material covered.
+
 == Install Gosu
 
 Follow the instructions for RUBY here:
@@ -367,3 +369,62 @@ Now we're calculating the new x,y coordinates of the ship on each pass of the ga
 * Call Player#move from the main game loop
 * Experiment with different numbers regarding acceleration
 
+== Asteroids
+
+Now that we can move around, lets add some asteroids to the mix. The first thing we need to do is create a file for all of our asteroid-y goodness:
+
+  touch lib/asteroid.rb
+
+And fill it with the basics (we know it will need x,y,angle,move,draw)... and speed:
+
+  include Math
+
+  class Asteroid
+    def initialize(window)
+      @image = Gosu::Image(window, 'assets/asteroid-large-1.png', false)
+      @x, @y, @angle = rand(640), rand(240), rand(360)
+      @speed_modifier = 2
+    end
+
+    def draw
+      @image.draw_rot(@x, @y, 1, @angle)
+    end
+
+    def move
+      @x += @speed_modifier*Math.sin(Math::PI/180*@angle)
+      @y += -@speed_modifier*Math.cos(Math::PI/180*@angle)
+      @x %= 640
+      @y %= 480
+    end
+  end
+
+You'll notice we ditched velocity -- it's not going to change once the asteroid has spawned so there's no point in calling it out. We'll just set the speed of the object when it's created and call it good. That's what we're calling our @speed_modifier.
+
+You'll also notice that we're using random numbers for @x, @y, and @angle. We want our asteroids to spawn in different places going in different directions.
+
+The other thing you'll notice is the formula we're using the Math library for sine and cosine functions. This is so we can calculate the next x,y coordinates based on speed and angle. This allows us to create a vector on which an asteroid ride. 
+
+The next thing we need to do is make our game aware of the asteroids...
+
+  include 'lib/asteroid'
+
+  class GameWindow < Gosu::Window
+    def initalize
+      @asteroids = [Asteroid.new(self]
+    end
+
+    def update
+      @asteroids.each {|asteroid| asteroid.move}
+    end
+
+    def draw
+      @asteroids.each {|asteroid| asteroid.draw}
+    end
+  end
+
+Now, if everything has gone according to plan, we should have a lone asteroid that spawns in different locations on each game load.
+
+= Lab_04
+
+* Spawn a SINGLE asteroid in a random location in the game window
+* Spawn MULTIPLE asteroids in random locations in the game window
