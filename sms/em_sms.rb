@@ -34,35 +34,39 @@ ActionMailer::Base.smtp_settings = {
    :password => "password",
    :enable_starttls_auto => true }
 
-class SMSDispatcher
-  def self.send(options = {})
-    new(options)
-  end
-  
-  def initialize(options = {})
-    1.times do  # You can really spam somebody here *hint*
-      deliver(options[:number], options[:carrier], options[:message])
-    end
-  end
-  
-  def deliver(number, carrier, message)
+EM.run do
+  def deliver(number, carrier, message, count = 1)
     begin
-      SMSFu.deliver(number,carrier,message)
-      log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
+      count.times do 
+        SMSFu.deliver(number,carrier,message)
+        log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
+      end
     rescue Errno::ECONNREFUSED => e
       log("Connection refused: " + e.message)
     rescue Exception => e
       log("Exception " + e.message)
     end
+    puts "\n\n"
+    prompt
+  end
+  
+  def prompt
+    print "Phone Number: "
+    number = gets.chomp
+    print "Carrier (e.g, at&t): "
+    carrier = gets.chomp
+    print "Message: "
+    message = gets.chomp
+    print "Number of messages: "
+    count = gets.chomp.to_i
+    puts "\n\n"
+    
+    deliver(number, carrier, message, count)
   end
   
   def log(message)
     puts "[#{Time.now.to_s}] #{message}"
   end
+  
+  prompt
 end
-
-SMSDispatcher.send(
-  :number => ARGV[0], 
-  :carrier => ARGV[1], 
-  :message => ARGV[2]
-)
