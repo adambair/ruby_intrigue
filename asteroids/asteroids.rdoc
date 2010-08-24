@@ -428,3 +428,72 @@ Now, if everything has gone according to plan, we should have a lone asteroid th
 
 * Spawn a SINGLE asteroid in a random location in the game window
 * Spawn MULTIPLE asteroids in random locations in the game window
+
+== Simple Collision Detection (Player vs Asteroid)
+
+Now that we can control the player and we have random moving asteroids -- we can talk about collision detection (also called hit detection).
+
+We need a way to tell if the player has collided with an Asteroid and execute some logic based on that.
+
+First, let's setup a hitbox for Asteroids and for the player (this method will be the same for each):
+
+  def initialize(window)
+    @x, @y = something, something
+    @image = Gosu::Image.new(window, 'asset/path', false)
+  end
+
+  def hitbox
+    hitbox_x = ((@x - @image.width/2).to_i..(@x + @image.width/2.to_i)).to_a
+    hitbox_y = ((@y - @image.width/2).to_i..(@y + @image.width/2).to_i).to_a
+    {:x => hitbox_x, :y => hitbox_y}
+  end
+
+Cool, but what does it do? This collects all of the x/y coordinates contained within the bounds of the image attached to the object. Let's add that method to both our Player and our Asteroid.
+
+Now that we have hitboxes, we need a way to compare them to see if they've overlapped. We'll handle that in our main game object (or in a separate utility library). For now, lets stick with the main game object:
+
+  class GameWindow < Gosu::Window
+    def collision?(object_1, object_2)
+      hitbox_1, hitbox_2 = object_1.hitbox, object_2.hitbox
+      common_x = hitbox_1[:x] & hitbox_2[:x]
+      common_y = hitbox_1[:y] & hitbox_2[:y]
+      common_x.size > 0 && common_y.size > 0 
+    end
+  end
+
+This gathers the two hitboxes from two objects (any object that has the appropriate methods) and then compares them to see if they overlap. The '&' operator will return all of the elements common to both arrays.
+
+This stuff can certainly be optimized but this works for now.
+
+The last step is to actually search for collisions within our game loop:
+
+  class GameWindow < Gosu::Window
+    def update
+      detect_collisions   
+    end
+      
+    def detect_collisions
+      @asteroids.each do |asteroid| 
+        if collision?(asteroid, @player)
+          puts 'kaboom'
+        end
+      end
+    end
+
+    def collision?(object_1, object_2)
+      hitbox_1, hitbox_2 = object_1.hitbox, object_2.hitbox
+      common_x = hitbox_1[:x] & hitbox_2[:x]
+      common_y = hitbox_1[:y] & hitbox_2[:y]
+      common_x.size > 0 && common_y.size > 0 
+    end
+  end
+
+PHEW! That's heavy. Let's see if everyone is on board ;)
+
+= Lab_05
+
+* Create a hitbox method and add it to both Player and Asteroid
+* Create a GameWindow#collision? method that will compare two object's hitboxes
+* Create a GameWindow#detect_collisions method that will iterate through @asteroids to see if there has been a collision with the @player
+* Print out 'kaboom' or 'oblivion' in the console if a collision occured 
+
