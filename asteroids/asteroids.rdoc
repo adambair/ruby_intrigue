@@ -12,7 +12,7 @@ Follow the instructions for RUBY here:
   http://code.google.com/p/gosu/wiki/GettingStartedOnLinux
   http://code.google.com/p/gosu/wiki/GettingStartedOnWindows
 
-== Test Gosu
+== Test Gosu Installation
 
 Create a folder for your project:
 
