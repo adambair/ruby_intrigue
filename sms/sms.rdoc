@@ -59,6 +59,10 @@ we have the SMS e-mail address.  This very address can be used to send SMS messa
 
 This is how SMS Fu works.
 
+== How do we install sms_fu?
+
+  sudo gem install sms_fu 
+
 == Dealing with Carriers
 
 sms_fu relies on a yaml file contains a list of carriers and their e-mail SMS addresses.  
