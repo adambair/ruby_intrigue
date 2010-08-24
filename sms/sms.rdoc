@@ -74,3 +74,12 @@ sms_fu relies on a yaml file contains a list of carriers and their e-mail SMS ad
 You can edit this sms_fu.yml file and add your own carriers in the same format.  SMS Fu currently supports a large list of carriers within the US and Internationally.
 
 Some International carriers actually make this e-mail to SMS solution a paid feature.  So, if you plan on sending text messages to anybody that's in a situation like this, make sure that they know that they might have to subscribe to an e-mail to SMS solution with their carrier.
+
+== From Address
+
+Well, since it is an e-mail, we will have to specify an e-mail address that can receive back replies.  Often, messages will appear on phones from random numbers.  Even though this is the case, if you reply back to these text messages, they will go back to the reply-to address specified in the e-mail used to deliver the outbound SMS.
+
+  config:
+    from_address:noreply@domain.com
+    
+By default, this is what sms_fu.yml has set for the reply-to address.  This can be modified in sms_fu.yml but can also be overridden when we deliver an SMS -- which is what we'll do in a later example.
