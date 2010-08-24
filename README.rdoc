@@ -1,5 +1,4 @@
-Ruby Intrigue
-=============
+=Ruby Intrigue
 
 Code for the 'Ruby Intrigue' talk given at Lonestar 2010
 Presented by: Adam Bair, Pradeep Elankumaran & Brendan Lim
