@@ -2,6 +2,8 @@
 
 Using Ruby, Gosu, and pure awesomeness, we're going to build a clone of Atari's 1979 classic, Asteroids.
 
+This guide assumes that you're using OSX but should be approximately the same for Linux/Windows.
+
 == Install Gosu
 
 Follow the instructions for RUBY here:
@@ -10,4 +12,43 @@ Follow the instructions for RUBY here:
   http://code.google.com/p/gosu/wiki/GettingStartedOnLinux
   http://code.google.com/p/gosu/wiki/GettingStartedOnWindows
 
+== Test Gosu
+
+Create a folder for your project:
+
+  mkdir asteroids
+  cd asteroids
+
+Copy the gosu bundle to your project:
+
+  cp /opt/local/lib/ruby/gems/1.8/gems/gosu-0.7.23-universal-darwin/lib/gosu.for_1_8.bundle .
+
+Create the initial file for your game:
+
+  touch game.rb
+
+Make it executable
+
+  chmod +x game.rb
+
+Edit game.rb to inclue the following:
+
+  #!/usr/bin/env ruby -w
+
+  require 'gosu.for_1_8.bundle'
+
+  class GameWindow < Gosu::Window
+    def initialize
+      super(640, 480, false)
+    end
+  end
+
+  window = GameWindow.new
+  window.show
+
+Run the file:
+
+  ./game.rb
+
+You should see a blank window. If you do, you're ready to go!
 
