@@ -9,7 +9,6 @@ class GameWindow < Gosu::Window
 
   # 60 times per second
   def update
-    puts 'testing game loop...'
   end
 
   # happens immediately after each iteration of the update method
