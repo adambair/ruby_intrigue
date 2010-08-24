@@ -24,6 +24,11 @@ Copy the gosu bundle to your project:
 
   cp /opt/local/lib/ruby/gems/1.8/gems/gosu-0.7.23-universal-darwin/lib/gosu.for_1_8.bundle lib 
 
+Or simply include it:
+
+  include 'rubygems'
+  include 'gosu'
+
 Create the initial file for your game:
 
   touch game.rb
@@ -261,6 +266,9 @@ This might be kind of slow -- due to the debug messages in the update loop, time
 
 = Lab_02
 
+* If you've been following along, make sure you can turn your ship
+* If you haven't, now's the time to make your ship turn :)
+
 == The Player, acceleration
 
 The next thing we need to do is handle acceleration... and first, lets capture the input of the Up arrow:
@@ -282,5 +290,80 @@ First, we'll need some way to keep track of the player's velocity:
       @velocity_x = @velocity_y = @angle = 0.0
     end
   end
+
+Let's refactor our x y coordinates while we're at it:
+
+  class Player
+    def initialize(window)
+      @x, @y = 320, 240
+    end
+
+    def draw
+      @image.draw_rot(@x, @y, 0, @angle)
+    end
+  end
   
+Now we need two methods to make this work the first is 'accelerate':
+  
+  class Player
+    def accelerate
+      @velocity_x += Gosu::offset_x(@angle, 0.18)
+      @velocity_y += Gosu::offset_y(@angle, 0.18)
+    end
+  end
+
+Gosu::offset returns the distance between the origin and the point to which you would get if you moved in the specified angle by the specified distance
+
+If you started this now -- you wouldn't notice any change in behavior -- this is because we're only setting the velocity. We haven't applied it to the ship's x y coordinates yet.
+
+That's where the 'move' method comes in:
+
+  class Player
+    def move
+      @x += @velocity_x
+      @y += @velocity_y
+
+      @velocity_x *= 1
+      @velocity_y *= 1
+    end
+  end
+
+In the first part we're modifying the ship's coordinates based on the velocity calculated in the accelerate method (which is called when you hit 'Up'). The other part calculates the rate of acceleration when there is no player input... 1 would mean constant, no increase or decrease... if you had .98 in there, you'd slow down gradually... 1.2 you'd steadily increase in speed.
+
+There's also something else we need to account for, wrapping of the player when they go off screen. Currently the coordinates would continue to increase until you left screen... that's not very useful in this case.
+
+We need to make it so you wrap around to the other side:
+
+
+  class Player
+    def move
+      @x += @velocity_x
+      @y += @velocity_y
+
+      @x %= 640
+      @y %= 480
+
+      @velocity_x *= 1
+      @velocity_y *= 1
+    end
+  end
+
+We're using modulus to find the remainder and set that as our new x,y -- this will allow you to wrap around the screen.
+
+The last thing we need to do is call Player#move from the main game loop so we can make our ship move based on acceleration:
+
+  class GameWindow < Gosu::Window
+    def update
+      @player.move
+    end
+  end
+
+Now we're calculating the new x,y coordinates of the ship on each pass of the game loop. At this point we should be all set regarding ship control and movement
+
+= Lab_03
+
+* Make your ship move using the techniques discussed since the previous lab
+* Implement the following methods: Player#accelerate, Player#move
+* Call Player#move from the main game loop
+* Experiment with different numbers regarding acceleration
 
