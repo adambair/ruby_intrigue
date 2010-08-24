@@ -13,7 +13,6 @@ class GameWindow < Gosu::Window
   # 60 times per second
   def update
     control_player
-    @player.move
     # puts 'testing game loop...'
   end
 
@@ -33,9 +32,6 @@ class GameWindow < Gosu::Window
     end
     if button_down? Gosu::KbRight
       @player.turn_right
-    end
-    if button_down? Gosu::KbUp
-      @player.accelerate
     end
   end
 end

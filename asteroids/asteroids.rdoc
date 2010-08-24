@@ -2,7 +2,7 @@
 
 Using Ruby, Gosu, and pure awesomeness, we're going to build a clone of Atari's 1979 classic, Asteroids.
 
-This guide assumes that you're using OSX but should be approximately the same for Linux/Windows.
+This guide assumes that you're using OSX but should be approximately the same for Linux/Windows. If you're having trouble getting Gosu installed on your box, that's okay, we can pair up on machines that have a working install. TEAMWORK! :)
 
 == Install Gosu
 
@@ -129,14 +129,158 @@ There is also a method called 'button_down(id)' which is called once per key pre
     puts 'pressed' if id == Gosu::KbH
   end
 
-This will print 'pressed' once, even if the button is held down. This resets once the button has been released.
+This will print 'pressed' once, even if the 'h' key is held down on the keyboard. This resets once the button has been released.
 
 A useful test for this is to create a button that will allow you to quit the game easily. Gosu provides the 'close' method for this very purpose. 
 
-=Lab 1
+=Lab_01
 
 * Experiment with different resolution sizes (fullscreen vs. windowed)
-* Set a background image
+* Set a background image and experiment with it's positioning
 * Setup and manually test the game loop (update)
 * Map a key to close the application
+
+== The Player, drawing
+
+Now that we have a basic understanding of the game window, let's move onto something a bit more fun and interactive: The player. This is the ship that the player controls.
+
+The first thing we need to do is create a file where the player's source can exist:
+
+  touch lib/player.rb
+
+And include it in the main game file game.rb:
+
+  require 'lib/player'
+
+Open lib/player.rb and create a basic class:
+
+  class Player
+    def initialize(window)
+    end
+  end
+
+You'll notice that we're requiring that the window be passed to the player upon creation -- this is because you'll need that window object in order to setup the player's image (the ship). The image needs to know where it will be drawn.
+
+Let's setup the image just like we did with the background image:
+
+  class Player
+    def initialize(window)
+      @image = Gosu::Image.new(window, 'assets/ship.png', false)
+    end
+  end
+  
+We also need to make it so we can draw the player to the screen:
+
+  class Player
+    def draw
+      @image.draw_rot(320, 240, 0, 0)
+    end
+  end
+
+Notice that we're using 'draw_rot' instead of 'draw'. This will become important shortly, this will allow us to rotate the image instead of having it in a fixed position.
+
+The arguments are: draw_rot(x,y,z,angle)
+
+We're drawing the player ship in the middle of our screen (640x480) with no z-index and no angle.
+
+We'll then need to setup a player in the actual game itself:
+  
+  require 'lib/player'
+
+  class GameWindow < Gosu::Window
+    def initialize
+      @player = Player.new(self)
+    end
+
+    def draw
+      @player.draw
+    end
+  end
+
+This will instantiate a new player object and will draw it on screen.
+
+== The Player, turning
+
+Now that we can display the player on screen, we can work on controlling it with keyboard input.
+
+Let's start with turning. First let's capture some input:
+
+  class GameWindow < Gosu::Window
+    def update
+      control_player
+    end
+
+    def control_player
+      if button_down? Gosu::KbLeft
+        puts 'turning left'
+      end
+      if button_down? Gosu::KbRight
+        puts 'turning right'
+      end
+    end
+  end
+  
+This should print the debug messages any time you hold down left or right.
+
+Now we'll wire this up to the actual Player:
+
+  class Player
+    def initialize(window)
+      @angle = 0.0
+    end
+
+    def turn_left
+      @angle -= 4.5
+    end
+
+    def turn_right
+      @angle += 4.5
+    end
+  end 
+
+And then replace the debug message:
+
+  class GameWindow < Gosu::Window
+    def control_player
+      if button_down? Gosu::KbLeft
+        @player.turn_left
+      end
+      if button_down? Gosu::KbRight
+        @player.turn_right
+      end
+    end
+  end
+
+This might be kind of slow -- due to the debug messages in the update loop, time to remove/comment this line:
+  
+  class GameWindow < Gosu::Window
+    def update
+      # puts 'testing game loop...'
+    end
+  end
+
+= Lab_02
+
+== The Player, acceleration
+
+The next thing we need to do is handle acceleration... and first, lets capture the input of the Up arrow:
+
+  class GameWindow < Gosu::Window
+    def control_player
+      if button_down? Gosu::KbUp
+        @player.accelerate
+      end
+    end
+  end
+
+And wire it up in the Player... we'll need to add a few things here...
+
+First, we'll need some way to keep track of the player's velocity:
+
+  class Player
+    def initialize(window)
+      @velocity_x = @velocity_y = @angle = 0.0
+    end
+  end
+  
 
