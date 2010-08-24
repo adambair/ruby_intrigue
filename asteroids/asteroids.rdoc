@@ -18,10 +18,11 @@ Create a folder for your project:
 
   mkdir asteroids
   cd asteroids
+  mkdir lib
 
 Copy the gosu bundle to your project:
 
-  cp /opt/local/lib/ruby/gems/1.8/gems/gosu-0.7.23-universal-darwin/lib/gosu.for_1_8.bundle .
+  cp /opt/local/lib/ruby/gems/1.8/gems/gosu-0.7.23-universal-darwin/lib/gosu.for_1_8.bundle lib 
 
 Create the initial file for your game:
 
@@ -35,7 +36,7 @@ Edit game.rb to inclue the following:
 
   #!/usr/bin/env ruby -w
 
-  require 'gosu.for_1_8.bundle'
+  require 'lib/gosu.for_1_8.bundle'
 
   class GameWindow < Gosu::Window
     def initialize

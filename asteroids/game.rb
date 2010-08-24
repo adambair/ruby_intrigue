@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -w
 
-require 'gosu.for_1_8.bundle'
+require 'lib/*.rb'
 
 class GameWindow < Gosu::Window
   def initialize
