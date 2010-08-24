@@ -1,5 +1,9 @@
 = Building an SMS Server
 
+  Ruby Intrigue
+  Lone Star Ruby Conference 2010
+  Pradeep Elankumaran, Adam Bair, Brendan G. Lim
+
 Using Ruby, we're going to learn how to build something that we can use to quickly send SMS messages.
 
 == Why SMS?
