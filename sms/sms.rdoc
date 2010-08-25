@@ -271,3 +271,132 @@ Cool, now we've got something legit that we can use anywhere to deliver SMS mess
   SMSSpammer.start
 
 Once run, it should immediately prompt the user for all the info that it needs to get the job done.
+
+== Lab 05
+
+We've done the whole outgoing SMS thing and that was pretty easy.  Now, we're going to try to process incoming SMS.  Processing incoming SMS that is sent from messages delivered via sms_fu is exactly like processing incoming e-mails.  Why? Well, it's the same because it *is* an e-mail.
+
+In this lab we're going to be dealing with pulling back e-mails via IMAP and processing these items back by using MMS2R.  We're also going to be introducing a little bit of EventMachine in this lab as well.
+
+First, let's create the base for our SMSImporter class.
+
+  require 'rubygems'
+  require 'net/imap'
+
+  class SMSImporter
+    def initialize(options = {})
+      @server   = "imap.gmail.com"
+      @username = "email@domain.com" # Full e-mail needed
+      @password = "password"
+      @port     = 993
+      @folder   = "INBOX"
+      @ssl      = true
+    end
+  
+    def self.start
+      new.start
+    end
+  
+    def start
+      EM.run do 
+        EM::add_periodic_timer(10) { 
+          setup_imap(@server, @port, @username, @password, @folder, @ssl) 
+        }
+      end
+    end
+  
+    def setup_imap(server, port, username, password, folder, ssl)
+      imap = Net::IMAP::new(server, port, ssl)
+      imap.login(username, password)
+      imap.select(folder)
+      mail_items = imap.search(["NOT", "SEEN"])
+    end
+  
+    def log(message)
+      puts "#{Time.now.to_s}: #{message}"
+    end
+  end
+
+  command = ARGV[0] || 'start'
+  SMSImporter.send(command.to_sym)  
+  
+Remember, this is just essentially an e-mail importer.  Next, what we should do is add some error handling.
+
+Change your setup_imap method to handle some nasty IMAP errors that you could possibly run into.
+
+  def setup_imap(server, port, username, password, folder, ssl)
+    begin
+      imap = Net::IMAP::new(server, port, ssl)
+      imap.login(username, password)
+      imap.select(folder)
+      mail_items = imap.search(["NOT", "SEEN"])
+    rescue Net::IMAP::NoResponseError => e
+      log("#{e.class} - Command sent to server could not be completed successfully: #{e.message}")
+      log(e.backtrace.join("\n"))
+    rescue Net::IMAP::ByeResponseError => e
+      log("#{e.class} - Login issues or timed out due to inactivity: #{e.message}")
+      log(e.backtrace.join("\n"))
+    rescue Exception => e
+      log("#{e.class}: #{e.message}")
+      log(e.backtrace.join("\n"))
+    ensure
+      imap.logout rescue log("Logout has crashed")
+    end
+  end
+  
+The next thing we should do is actually do something with this mail_items variable that we have.  Let's create a new method to check to see if there's actually anything new within here.
+
+Underneath mail_items = .... let's add the following
+
+  check_for_new_mail(mail_items, imap)
+  
+Then, let's create a new method called check_for_new_mail that accepts these parameters.
+
+  def check_for_new_mail(mail_items, imap) 
+    if mail_items.empty?
+      log("There are currently no e-mails to process.")
+    else
+      log("We've got mail")
+    end
+  end
+
+Cool, now if we actually run this file now, it should check and let us know if we have mail or not.
+
+Let's take a minute to try this out.
+
+Alright, now let's replace what we have in that else block in the check_for_new_mail method to actually process new e-mails.
+
+  mail_items.each do |message_id|
+    email = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
+    process_email(email, message_id, imap)
+  end
+
+Now, lastly let's create this new process_email method that we introduced.
+
+  def process_email(email, message_id, imap)
+    begin
+      tmail = TMail::Mail.parse(email)
+    rescue Exception => e
+      log("#{e.class}: #{e.message}")
+      log(e.backtrace.join("\n"))
+    end
+  end
+  
+This will return to us a basic TMail object.  The problem we have to deal with now is that almost all carriers leave their own little branding in e-mails & MMS messages.  We can remove this by using MMS2R.  MMS2R will examine the from address and depending on the carrier, remove the carrier specific branding.  What you're left is is the message that the user intended on sending you.  You can also use MMS2R to retrieve back the image that was sent in MMS messages as well.   We'll just be dealing with the text though.  
+
+Underneath the tmail line, add the following.
+
+mms = MMS2R.parse(email)
+
+  if mms.body.downcase.include?("sms")
+    log("Received [#{mms.body}] from [#{tmail.from}] with number [#{mms.number}]")
+    imap.store(message_id, "+FLAGS", [:Deleted])
+    log("Deleted...")
+    imap.expunge
+  else
+    log("Ignoring from [#{tmail.from}]")
+  end
+
+I'm just checking for 'sms' in the body since I don't want to purge all of your e-mails.  Change it to something more specific if you like.
+
+Now, to run this, let's run our outgoing SMS script.  Make sure that the reply to address is the same address that's within your SMSImporter class.  Reply back to that SMS with the message 'sms'.  Then, run the SMS Importer.  If all went well, you should see the SMS Importer processing your reply.
