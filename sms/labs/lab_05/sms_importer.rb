@@ -1,7 +1,6 @@
 # Importer used to receive SMS/MMS via e-mail
 # sudo gem install tmail
 # sudo gem install mms2r
-# sudo gem install eventmachine
 
 require 'rubygems'
 require 'net/imap'
