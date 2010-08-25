@@ -18,7 +18,7 @@ class GameWindow < Gosu::Window
 
   # 60 times per second
   def update
-    control_player
+    control_player unless @player.dead?
 
     @player.move
 
@@ -53,7 +53,7 @@ class GameWindow < Gosu::Window
   def button_down(id)
     close if id == Gosu::KbQ
     if id == Gosu::KbSpace
-      @projectiles << Projectile.new(self, @player)
+      @projectiles << Projectile.new(self, @player) unless @player.dead?
     end
   end
 
