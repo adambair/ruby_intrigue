@@ -1009,3 +1009,33 @@ We also added text input to control exiting the application "Q"
 * Draw title with instructions
 * Press 's' to start the game
 
+== Game Over
+
+The last thing we need to implement is a game over screen.
+
+  class GameWindow < Gosu::Window
+    def draw
+      if @lives <= 0
+        @font.draw("GAME OVER", 200, 150, 50, 2.0, 2.0, 0xffffffff)
+        @font.draw("press 'r' to restart", 195, 320, 50, 1, 1, 0xffffffff)
+        @font.draw("press 'q' to quit", 210, 345, 50, 1, 1, 0xffffffff)
+      end
+    end
+  end
+
+We should also implement a way to restart the game once you're killed:
+
+  class GameWindow < Gosu::Window
+    def update
+      if button_down? Gosu::KbR
+        title_screen unless @game_in_progress == false
+        @game_in_progress = false
+      end
+    end
+  end
+
+= Lab_12
+
+* Implement Game Over screen
+* Implement restart button
+
