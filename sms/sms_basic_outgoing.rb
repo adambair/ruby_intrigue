@@ -31,42 +31,36 @@ ActionMailer::Base.smtp_settings = {
    :domain => "gmail.com",
    :authentication => :plain,
    :user_name => "username",  # don't put "@gmail.com"
-   :password => "password",
+   :password => "passwor",
    :enable_starttls_auto => true }
 
-EM.run do
-  def deliver(number, carrier, message, count = 1)
+class SMSBasic
+  def self.send(options = {})
+    new(options)
+  end
+  
+  def initialize(options = {})
+    deliver(options[:number], options[:carrier], options[:message])
+  end
+  
+  def deliver(number, carrier, message)
     begin
-      count.times do 
-        SMSFu.deliver(number,carrier,message)
-        log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
-      end
+      SMSFu.deliver(number,carrier,message)
+      log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
     rescue Errno::ECONNREFUSED => e
       log("Connection refused: " + e.message)
     rescue Exception => e
       log("Exception " + e.message)
     end
-    puts "\n\n"
-    prompt
-  end
-  
-  def prompt
-    print "Phone Number: "
-    number = gets.chomp
-    print "Carrier (e.g, at&t): "
-    carrier = gets.chomp
-    print "Message: "
-    message = gets.chomp
-    print "Number of messages: "  # This could get dangeous
-    count = gets.chomp.to_i
-    puts "\n\n"
-    
-    deliver(number, carrier, message, count)
   end
   
   def log(message)
     puts "[#{Time.now.to_s}] #{message}"
   end
-  
-  prompt
 end
+
+SMSBasic.send(
+  :number => ARGV[0], 
+  :carrier => ARGV[1], 
+  :message => ARGV[2]
+)
