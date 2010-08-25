@@ -36,7 +36,6 @@ class SMSImporter
       imap.login(username, password)
       imap.select(folder)
       mail_items = imap.search(["NOT", "SEEN"])
-      check_for_new_mail(mail_items, imap)
     rescue Net::IMAP::NoResponseError => e
       log("#{e.class} - Command sent to server could not be completed successfully: #{e.message}")
       log(e.backtrace.join("\n"))
@@ -48,36 +47,6 @@ class SMSImporter
       log(e.backtrace.join("\n"))
     ensure
       imap.logout rescue log("Logout has crashed")
-    end
-  end
-  
-  def check_for_new_mail(mail_items, imap) 
-    if mail_items.empty?
-      log("There are currently no e-mails to process.")
-    else
-      mail_items.each do |message_id|
-        email = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
-        process_email(email, message_id, imap)
-      end
-    end
-  end
-  
-  def process_email(email, message_id, imap)
-    begin
-      tmail = TMail::Mail.parse(email)
-      mms = MMS2R.parse(email)
-
-      if mms.body.downcase.include?("sms")
-        log("Received [#{mms.body}] from [#{tmail.from}] with number [#{mms.number}]")
-        imap.store(message_id, "+FLAGS", [:Deleted])
-        log("Deleted...")
-        imap.expunge
-      else
-        log("Ignoring from [#{tmail.from}]")
-      end
-    rescue Exception => e
-      log("#{e.class}: #{e.message}")
-      log(e.backtrace.join("\n"))
     end
   end
   

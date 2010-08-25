@@ -55,29 +55,7 @@ class SMSImporter
     if mail_items.empty?
       log("There are currently no e-mails to process.")
     else
-      mail_items.each do |message_id|
-        email = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
-        process_email(email, message_id, imap)
-      end
-    end
-  end
-  
-  def process_email(email, message_id, imap)
-    begin
-      tmail = TMail::Mail.parse(email)
-      mms = MMS2R.parse(email)
-
-      if mms.body.downcase.include?("sms")
-        log("Received [#{mms.body}] from [#{tmail.from}] with number [#{mms.number}]")
-        imap.store(message_id, "+FLAGS", [:Deleted])
-        log("Deleted...")
-        imap.expunge
-      else
-        log("Ignoring from [#{tmail.from}]")
-      end
-    rescue Exception => e
-      log("#{e.class}: #{e.message}")
-      log(e.backtrace.join("\n"))
+      log("We've got mail")
     end
   end
   
