@@ -1,3 +1,4 @@
+# Deliver a basic SMS
 # sudo gem install ambethia-smtp-tls -v '1.1.2' --source http://gems.github.com
 
 require 'rubygems'

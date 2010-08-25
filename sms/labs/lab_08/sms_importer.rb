@@ -1,12 +1,9 @@
-# sudo gem install tmail
-# sudo gem install mms2r
-# sudo gem install eventmachine
+# Importer used to receive SMS/MMS via e-mail
 
 require 'rubygems'
 require 'net/imap'
 require 'tmail'
 require 'mms2r'
-require 'eventmachine'
 
 class SMSImporter
   def initialize(options = {})

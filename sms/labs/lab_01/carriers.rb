@@ -1,3 +1,5 @@
+# Show all the carriers within sms_fu and how addresses are formatted
+
 require 'rubygems'
 require 'sms_fu'
 

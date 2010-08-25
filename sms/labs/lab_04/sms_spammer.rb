@@ -1,23 +1,6 @@
-# Gmail
-# ====================================================================================================
-# sudo gem install ambethia-smtp-tls -v '1.1.2' --source http://gems.github.com
-# sudo gem install sms-fu
-# ActionMailer::Base.delivery_method = :smtp
-# ActionMailer::Base.smtp_settings = {
-#    :address => "smtp.gmail.com",
-#    :port => 587,
-#    :domain => "gmail.com",
-#    :authentication => :plain,
-#    :user_name => "username",  # don't put "@gmail.com"
-#    :password => "password",
-#    :enable_starttls_auto => true }
-   
-# Sendmail
-# ====================================================================================================
-# Be sure to start the postfix daemon
-# sudo launchctl start org.postfix.master
-# tail -n 200 -f /var/log/mail.log
-# ActionMailer::Base.delivery_method = :sendmail
+# Script that allows us to spam over and over again
+# DISCLAIMER: I take no responsibility for any harm or damage
+# that is done using this.  You should know better ;)
 
 require 'rubygems'
 require 'sms_fu'
