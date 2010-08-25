@@ -1,7 +1,6 @@
 # More structured script to send an SMS
 
 require 'rubygems'
-require 'eventmachine'
 require 'sms_fu'
 require 'smtp-tls'
 

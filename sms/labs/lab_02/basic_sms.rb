@@ -2,7 +2,6 @@
 # sudo gem install ambethia-smtp-tls -v '1.1.2' --source http://gems.github.com
 
 require 'rubygems'
-require 'eventmachine'
 require 'sms_fu'
 require 'smtp-tls'
 

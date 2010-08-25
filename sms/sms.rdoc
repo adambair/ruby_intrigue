@@ -101,9 +101,59 @@ Adding a custom from address?
 Need to impost limits to make sure messages are properly truncated?
 
   SMSFu.deliver(“5558675309”, “at&t”, “hello”, :limit => 128)
+
+
+= Labs
+
+== Lab 01
+
+Let's see sms_fu in action.  First, make sure that you have sms_fu installed.  Now, bring up your favorite editor, Vim, Emacs, TextMate, Notepad, Microsoft Word (...).
+
+To see how sms_fu actually works, we need to make sure we know how it actually creates these e-mailable addresses.
+
+  require 'rubygems'
+  require 'sms_fu'
+
+  SMSFu.carriers.each do |carrier|
+    puts "\n#{carrier[1]['name']} [#{carrier[0]}]"
+    puts SMSFu.sms_address("123-456-7890", carrier[0])
+  end
+
+  puts "\n#{SMSFu.carriers.count} carriers"
   
+You can also see that sms_fu supports quite a large amount of carriers.  US and International.  
+
+== Lab 02
+
+How about we actually deliver a quick SMS?  
+
+First, if you don't have an e-mail address you can use, make one.  We'll also be using this e-mail address later to pull back incoming e-mails sent back via SMS.  
+
+I know that almost all of us have Gmail addresses.  Gmail's a little finicky when it comes to SMTP.  Install the smtp-tls gem.
+
+  sudo gem install ambethia-smtp-tls -v '1.1.2' --source http://gems.github.com
   
+Now that you have that setup, we can go ahead and get started writing this.
+
+  require 'rubygems'
+  require 'eventmachine'
+  require 'sms_fu'
+  require 'smtp-tls'
+
+  ActionMailer::Base.delivery_method = :smtp
+  ActionMailer::Base.smtp_settings = {
+     :address => "smtp.gmail.com",
+     :port => 587,
+     :domain => "gmail.com",
+     :authentication => :plain,
+     :user_name => "username",  # don't put "@gmail.com"
+     :password => "password",
+     :enable_starttls_auto => true }
+
+  number  = "123-456-7890"
+  carrier = "at&t"
+  message = "hello world"
+
+  SMSFu.deliver(number,carrier,message)
   
-  --
-  ==================================================================
-  This mobile text message is brought to you by AT&T
+It's up to you to choose the "victim" of your SMS.  I highly suggest using yourself so that you can actually see the results.  
