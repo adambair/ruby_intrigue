@@ -8,8 +8,8 @@ require 'fileutils'
 class SMSImporter
   def initialize(options = {})
     @server   = "imap.gmail.com"
-    @username = "thebrendanlim@gmail.com" # Full e-mail needed
-    @password = "nu11p0int3r"
+    @username = "email@domain.com" # Full e-mail needed
+    @password = "password"
     @port     = 993
     @folder   = "INBOX"
     @ssl      = true
