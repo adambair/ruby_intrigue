@@ -1,4 +1,4 @@
-= *RUBY AND SMS*
+= RUBY AND SMS
 
   Ruby Intrigue
   Lone Star Ruby Conference 2010
@@ -103,7 +103,7 @@ Need to impost limits to make sure messages are properly truncated?
   SMSFu.deliver(“5558675309”, “at&t”, “hello”, :limit => 128)
 
 
-= *IT'S LAB TIME*
+= IT'S LAB TIME
 
 == Lab 01
 
@@ -157,3 +157,117 @@ Now that you have that setup, we can go ahead and get started writing this.
   SMSFu.deliver(number,carrier,message)
   
 It's up to you to choose the "victim" of your SMS.  I highly suggest using yourself so that you can actually see the results.  
+
+== Lab 03
+
+Now that we've sent our own basic SMS, let's make a little script to make this more usable.  We're going to want to be able to take in three parameters from the command line.  These arguments are going to be the number, carrier, and the message.  We'll also throw in some error handling in there as well as some logging.  
+
+  require 'rubygems'
+  require 'sms_fu'
+  require 'smtp-tls'
+
+  ActionMailer::Base.delivery_method = :smtp
+  ActionMailer::Base.smtp_settings = {
+     :address => "smtp.gmail.com",
+     :port => 587,
+     :domain => "gmail.com",
+     :authentication => :plain,
+     :user_name => "username",  # don't put "@gmail.com"
+     :password => "password",
+     :enable_starttls_auto => true }
+
+  class SMSSender
+    def self.send(options = {})
+      new(options)
+    end
+  
+    def initialize(options = {})
+      deliver(options[:number], options[:carrier], options[:message])
+    end
+  
+    def deliver(number, carrier, message)
+      begin
+        SMSFu.deliver(number,carrier,message)
+        log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
+      rescue Errno::ECONNREFUSED => e
+        log("Connection refused: " + e.message)
+      rescue Exception => e
+        log("Exception " + e.message)
+      end
+    end
+  
+    def log(message)
+      puts "[#{Time.now.to_s}] #{message}"
+    end
+  end
+
+  SMSSender.send(
+    :number => ARGV[0], 
+    :carrier => ARGV[1], 
+    :message => ARGV[2]
+  )
+  
+Let's run this.  We can do this by doing.
+
+  ruby name_of_file.rb "123-457-7890" "at&t" "hello world!"
+  
+== Lab 04
+
+Cool, now we've got something legit that we can use anywhere to deliver SMS messages.  Let's make something fun.  What we want to do is make something that prompts our user for what number, carrier, and message they want to send.  We'll also take it one step further and ask them how many times they want to send this message.  Now, as a disclaimer, nobody is responsible for any damage/harm/legal action/etc that comes from this.  It's all on you buddy.  
+
+  require 'rubygems'
+  require 'sms_fu'
+  require 'smtp-tls'
+
+  ActionMailer::Base.delivery_method = :smtp
+  ActionMailer::Base.smtp_settings = {
+     :address => "smtp.gmail.com",
+     :port => 587,
+     :domain => "gmail.com",
+     :authentication => :plain,
+     :user_name => "username",  # don't put "@gmail.com"
+     :password => "password",
+     :enable_starttls_auto => true }
+
+  class SMSSpammer
+    def self.start
+      new.prompt
+    end
+  
+    def deliver(number, carrier, message, count = 1)
+      begin
+        count.times do 
+          SMSFu.deliver(number,carrier,message)
+          log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
+        end
+      rescue Errno::ECONNREFUSED => e
+        log("Connection refused: " + e.message)
+      rescue Exception => e
+        log("Exception " + e.message)
+      end
+      puts "\n\n"
+      prompt
+    end
+  
+    def prompt  
+      print "Phone Number: "
+      number = gets.chomp
+      print "Carrier (e.g, at&t): "
+      carrier = gets.chomp
+      print "Message: "
+      message = gets.chomp
+      print "Number of messages: "  # This could get dangeous
+      count = gets.chomp.to_i
+      puts "\n\n"
+  
+      deliver(number, carrier, message, count)
+    end
+
+    def log(message)
+      puts "[#{Time.now.to_s}] #{message}"
+    end
+  end
+
+  SMSSpammer.start
+
+Once run, it should immediately prompt the user for all the info that it needs to get the job done.
