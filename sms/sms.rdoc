@@ -105,7 +105,7 @@ Need to impost limits to make sure messages are properly truncated?
 
 = IT'S LAB TIME
 
-== Lab 01
+== Lab 01 - Carriers
 
 Let's see sms_fu in action.  First, make sure that you have sms_fu installed.  Now, bring up your favorite editor, Vim, Emacs, TextMate, Notepad, Microsoft Word (...).
 
@@ -123,7 +123,7 @@ To see how sms_fu actually works, we need to make sure we know how it actually c
   
 You can also see that sms_fu supports quite a large amount of carriers.  US and International.  
 
-== Lab 02
+== Lab 02 - Delivering an SMS
 
 How about we actually deliver a quick SMS?  
 
@@ -158,7 +158,7 @@ Now that you have that setup, we can go ahead and get started writing this.
   
 It's up to you to choose the "victim" of your SMS.  I highly suggest using yourself so that you can actually see the results.  
 
-== Lab 03
+== Lab 03 - Basic SMSSender
 
 Now that we've sent our own basic SMS, let's make a little script to make this more usable.  We're going to want to be able to take in three parameters from the command line.  These arguments are going to be the number, carrier, and the message.  We'll also throw in some error handling in there as well as some logging.  
 
@@ -211,7 +211,7 @@ Let's run this.  We can do this by doing.
 
   ruby name_of_file.rb "123-457-7890" "at&t" "hello world!"
   
-== Lab 04
+== Lab 04 - SMS Fun
 
 Cool, now we've got something legit that we can use anywhere to deliver SMS messages.  Let's make something fun.  What we want to do is make something that prompts our user for what number, carrier, and message they want to send.  We'll also take it one step further and ask them how many times they want to send this message.  Now, as a disclaimer, nobody is responsible for any damage/harm/legal action/etc that comes from this.  It's all on you buddy.  
 
@@ -272,7 +272,7 @@ Cool, now we've got something legit that we can use anywhere to deliver SMS mess
 
 Once run, it should immediately prompt the user for all the info that it needs to get the job done.
 
-== Lab 05
+== Lab 05 - Building an SMS / MMS Importer
 
 We've done the whole outgoing SMS thing and that was pretty easy.  Now, we're going to try to process incoming SMS.  Processing incoming SMS that is sent from messages delivered via sms_fu is exactly like processing incoming e-mails.  Why? Well, it's the same because it *is* an e-mail.
 
