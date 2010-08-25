@@ -6,6 +6,8 @@ This guide assumes that you're using OSX but should be approximately the same fo
 
 The labs are structured as "catch-up" -- that is to say, you can follow along and the lab will essentially be what we covered, but it will give you time to explore the concepts a bit further or give you time to bring your game up to speed... or have discussions surrounding the material covered.
 
+The two things we're not going to cover are sounds and the enemy flying saucers (out of the scope of this exercise).
+
 == Install Gosu
 
 Follow the instructions for RUBY here:
@@ -943,3 +945,67 @@ end
 * Increment the number of asteroids by one
 * Spawn new asteroids
 * Display level on screen
+
+== Title screen
+
+Now we have most of the game complete but we're still missing the title screen.
+
+  class GameWindow < Gosu::Window
+    def initialize
+      @game_in_progress = false
+      title_screen
+    end
+
+    def title_screen
+      @asteroids = Asteroid.spawn(self, 4)
+      @asteroids += @asteroids[0].kill
+      @asteroids += @asteroids[1].kill
+      @asteroids += @asteroids.last.kill
+    end
+
+    def setup_game
+      @player = Player.new(self)
+      @level = 1
+      @asteroid_count = 3
+      @asteroids = Asteroid.spawn(self, @asteroid_count)
+      @projectiles = []
+      @game_in_progress = true
+    end
+
+    def update
+      if button_down? Gosu::KbQ
+        close
+      end
+
+      if button_down? Gosu::KbS
+        setup_game unless @game_in_progress
+      end   
+
+      return unless @game_in_progress
+
+      #... other stuff
+    end
+
+    def draw
+      unless @game_in_progress
+        @font.draw("ASTEROIDS", 175, 120, 50, 2.8, 2.8, 0xffffffff)
+        @font.draw("press 's' to start", 210, 320, 50, 1, 1, 0xffffffff)
+        @font.draw("press 'q' to quit", 216, 345, 50, 1, 1, 0xffffffff)
+      end
+      return unless @game_in_progress
+      
+      #... other stuff
+    end
+  end
+
+Be sure to move the asteroids logic above 'return unless @game_in_progress' to be sure that the background asteroids (for the title screen) will be rendered.
+
+We also added text input to control exiting the application "Q"
+
+= Lab_11
+
+* Extract game setup out into another method
+* Set a flag for game_in_progress (that flips when you press 's')
+* Draw title with instructions
+* Press 's' to start the game
+
