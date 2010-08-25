@@ -31,7 +31,7 @@ ActionMailer::Base.smtp_settings = {
    :domain => "gmail.com",
    :authentication => :plain,
    :user_name => "username",  # don't put "@gmail.com"
-   :password => "passwor",
+   :password => "password",
    :enable_starttls_auto => true }
 
 class SMSBasic
