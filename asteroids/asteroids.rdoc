@@ -140,7 +140,7 @@ This will print 'pressed' once, even if the 'h' key is held down on the keyboard
 
 A useful test for this is to create a button that will allow you to quit the game easily. Gosu provides the 'close' method for this very purpose. 
 
-=Lab_01
+= Lab_01
 
 * Experiment with different resolution sizes (fullscreen vs. windowed)
 * Set a background image and experiment with it's positioning
@@ -761,8 +761,18 @@ end
 And handle it in our game loop... (remove the comment, replace it with @player.kill)
 
 class GameWindow < Gosu::Window
+  def update
+    control_player unless @player.dead
+  end
+
   def draw
     @player.draw unless @player.dead?
+  end
+
+  def button_down(id)
+    if id == Gosu::KbSpace
+      @projectiles << Projectile.new(self, @player) unless @player.dead?
+    end
   end
 
   def detect_collisions
@@ -773,6 +783,8 @@ class GameWindow < Gosu::Window
     end
   end
 end
+
+Note that we halt player control once they run out of lives -- this will prevent shots being fired from a ghost ship...
 
 Asteroids just became a touch more serious. Hardcore mode is fun and all but how about we add a few lives to make the game a bit easier:
 
@@ -890,9 +902,44 @@ Font.new(window, font-name, size)
 
 At this point you should be able to see your points adding up as you blast away asteroids.
 
-= Lab 09
+= Lab_09
 
 * Add Player#score 
 * Give point values to Asteroids based on their size
 * Tally the score in GameWindow#detect_collisions
 
+== Levels
+
+Now that we've setup scoring and lives -- we need to setup levels. Once all of the asteroids are cleared, we need to spawn a new set with an additional large asteroid.
+
+class GameWindow < Gosu::Window
+  def initialize
+    @level = 1
+    @initial_asteroid_count = 3
+    @asteroids = Asteroid.spawn(self, @initial_asteroid_count)
+  end
+  
+  def update
+    next_level if @asteroids.size == 0 
+  end
+    
+  def next_level
+    @initial_asteroid_count += 1
+    @asteroids = Asteroid.spawn(self, @initial_asteroid_count) 
+  end
+end
+
+The only thing left is to display the current level on the screen:
+
+class GameWindow < Gosu::Window
+  def update
+    @font.draw(@level, 610, 10, 50, 1.0, 1.0, 0xffffffff)
+  end
+end
+
+= Lab_10
+
+* Increment the level once all asteroids have been cleared
+* Increment the number of asteroids by one
+* Spawn new asteroids
+* Display level on screen
