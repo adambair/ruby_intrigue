@@ -386,8 +386,7 @@ This will return to us a basic TMail object.  The problem we have to deal with n
 
 Underneath the tmail line, add the following.
 
-mms = MMS2R.parse(email)
-
+  mms = MMS2R.parse(email)
   if mms.body.downcase.include?("sms")
     log("Received [#{mms.body}] from [#{tmail.from}] with number [#{mms.number}]")
     imap.store(message_id, "+FLAGS", [:Deleted])
