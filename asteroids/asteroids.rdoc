@@ -2,7 +2,11 @@
 
 Using Ruby, Gosu, and pure awesomeness, we're going to build a clone of Atari's 1979 classic, Asteroids.
 
-This guide assumes that you're using OSX but should be approximately the same for Linux/Windows.
+This guide assumes that you're using OSX but should be approximately the same for Linux/Windows. If you're having trouble getting Gosu installed on your box, that's okay, we can pair up on machines that have a working install. TEAMWORK! :)
+
+The labs are structured as "catch-up" -- that is to say, you can follow along and the lab will essentially be what we covered, but it will give you time to explore the concepts a bit further or give you time to bring your game up to speed... or have discussions surrounding the material covered.
+
+The two things we're not going to cover are sounds and the enemy flying saucers (out of the scope of this exercise).
 
 == Install Gosu
 
@@ -12,16 +16,22 @@ Follow the instructions for RUBY here:
   http://code.google.com/p/gosu/wiki/GettingStartedOnLinux
   http://code.google.com/p/gosu/wiki/GettingStartedOnWindows
 
-== Test Gosu
+== Test Gosu Installation
 
 Create a folder for your project:
 
   mkdir asteroids
   cd asteroids
+  mkdir lib
 
 Copy the gosu bundle to your project:
 
-  cp /opt/local/lib/ruby/gems/1.8/gems/gosu-0.7.23-universal-darwin/lib/gosu.for_1_8.bundle .
+  cp /opt/local/lib/ruby/gems/1.8/gems/gosu-0.7.23-universal-darwin/lib/gosu.for_1_8.bundle lib 
+
+Or simply include it:
+
+  include 'rubygems'
+  include 'gosu'
 
 Create the initial file for your game:
 
@@ -35,7 +45,7 @@ Edit game.rb to inclue the following:
 
   #!/usr/bin/env ruby -w
 
-  require 'gosu.for_1_8.bundle'
+  require 'lib/gosu.for_1_8.bundle'
 
   class GameWindow < Gosu::Window
     def initialize
@@ -46,9 +56,986 @@ Edit game.rb to inclue the following:
   window = GameWindow.new
   window.show
 
+Calling 'super' in the 'initialize' method sets the display resolution and if it's run in fullscreen or windowed mode.
+
 Run the file:
 
   ./game.rb
 
 You should see a blank window. If you do, you're ready to go!
+
+== Gosu Callbacks (Game Loop)
+
+There are two main loops in Gosu that will provide you with the constructs in which to build a game.
+
+The first is the 'update' method. This method is called 60 times a second and is where you handle your standard game logic. This is considered the game loop.
+
+The second is the 'draw' method. This is called after each 'update' iteration and is used to 'draw' the changes on screen. It's recommended that you avoid putting logic in this method. It should only be used to draw to the screen resulting from changes in state made during the update loop.
+
+These loops will run forever until you quit the application.
+
+Add these two methods to your main game file:
+
+  # 60 times per second
+  def update
+  end
+
+  # happens immediately after each iteration of the update method
+  def draw
+  end
+
+You can see how fast these loops run if you put a 'puts' statement in the update method. Keep in mind that you're not seeing 60 'puts' a second. You're terminal may not be able to keep up and will degrade game performance. 
+
+== Images (background)
+
+Images are the primary way we'll be displaying information on screen throughout this application. 
+
+The first most basic image is a background image. 
+
+  class GameWindow < Gosu::Window
+    def initialize
+      @background_image = Gosu::Image.new(self, "assets/background.png", true)
+    end
+  end
+
+You'll notice that Gosu::Image takes a few arguments:
+
+  The first is the window to which the image belongs
+  The second is the path to the image
+  The last is if the image is tileable 
+
+The constructor (from the docs):
+
+  # initialize(window, filename_or_rmagick_image, tileable, [srcX, srcY, srcWidth, srcHeight]) 
+
+Once you have the image stored in an instance variable, you'll need to actually display/draw it to the game window:
+
+  class GameWindow < Gosu::Window
+    def draw
+      @background_image.draw(0, 0, 0)   
+    end  
+  end
+
+Draw takes a few arguments, we're using x, y, and z coordinates.
+
+It's important to note that the game window uses Cartesian coordinates. This is how you will place objects in the window.
+
+== Handling Input
+
+See the documentation for a list of all possible input triggers:
+
+  http://code.google.com/p/gosu/wiki/RubyReference
+
+  if button_down? Gosu::KbH
+    puts 'pressing' if id == Gosu::KbH
+  end
+
+This will print 'pressing' the whole time the 'h' key is being pressed, or held down.
+
+There is also a method called 'button_down(id)' which is called once per key press.
+
+  def button_down(id)
+    puts 'pressed' if id == Gosu::KbH
+  end
+
+This will print 'pressed' once, even if the 'h' key is held down on the keyboard. This resets once the button has been released.
+
+A useful test for this is to create a button that will allow you to quit the game easily. Gosu provides the 'close' method for this very purpose. 
+
+= Lab_01
+
+* Experiment with different resolution sizes (fullscreen vs. windowed)
+* Set a background image and experiment with it's positioning
+* Setup and manually test the game loop (update)
+* Map a key to close the application
+
+== The Player, drawing
+
+Now that we have a basic understanding of the game window, let's move onto something a bit more fun and interactive: The player. This is the ship that the player controls.
+
+The first thing we need to do is create a file where the player's source can exist:
+
+  touch lib/player.rb
+
+And include it in the main game file game.rb:
+
+  require 'lib/player'
+
+Open lib/player.rb and create a basic class:
+
+  class Player
+    def initialize(window)
+    end
+  end
+
+You'll notice that we're requiring that the window be passed to the player upon creation -- this is because you'll need that window object in order to setup the player's image (the ship). The image needs to know where it will be drawn.
+
+Let's setup the image just like we did with the background image:
+
+  class Player
+    def initialize(window)
+      @image = Gosu::Image.new(window, 'assets/ship.png', false)
+    end
+  end
+  
+We also need to make it so we can draw the player to the screen:
+
+  class Player
+    def draw
+      @image.draw_rot(320, 240, 0, 0)
+    end
+  end
+
+Notice that we're using 'draw_rot' instead of 'draw'. This will become important shortly, this will allow us to rotate the image instead of having it in a fixed position.
+
+The arguments are: draw_rot(x,y,z,angle)
+
+We're drawing the player ship in the middle of our screen (640x480) with no z-index and no angle.
+
+We'll then need to setup a player in the actual game itself:
+  
+  require 'lib/player'
+
+  class GameWindow < Gosu::Window
+    def initialize
+      @player = Player.new(self)
+    end
+
+    def draw
+      @player.draw
+    end
+  end
+
+This will instantiate a new player object and will draw it on screen.
+
+== The Player, turning
+
+Now that we can display the player on screen, we can work on controlling it with keyboard input.
+
+Let's start with turning. First let's capture some input:
+
+  class GameWindow < Gosu::Window
+    def update
+      control_player
+    end
+
+    def control_player
+      if button_down? Gosu::KbLeft
+        puts 'turning left'
+      end
+      if button_down? Gosu::KbRight
+        puts 'turning right'
+      end
+    end
+  end
+  
+This should print the debug messages any time you hold down left or right.
+
+Now we'll wire this up to the actual Player:
+
+  class Player
+    def initialize(window)
+      @angle = 0.0
+    end
+
+    def turn_left
+      @angle -= 4.5
+    end
+
+    def turn_right
+      @angle += 4.5
+    end
+  end 
+
+And then replace the debug message:
+
+  class GameWindow < Gosu::Window
+    def control_player
+      if button_down? Gosu::KbLeft
+        @player.turn_left
+      end
+      if button_down? Gosu::KbRight
+        @player.turn_right
+      end
+    end
+  end
+
+This might be kind of slow -- due to the debug messages in the update loop, time to remove/comment this line:
+  
+  class GameWindow < Gosu::Window
+    def update
+      # puts 'testing game loop...'
+    end
+  end
+
+= Lab_02
+
+* If you've been following along, make sure you can turn your ship
+* If you haven't, now's the time to make your ship turn :)
+
+== The Player, acceleration
+
+The next thing we need to do is handle acceleration... and first, lets capture the input of the Up arrow:
+
+  class GameWindow < Gosu::Window
+    def control_player
+      if button_down? Gosu::KbUp
+        @player.accelerate
+      end
+    end
+  end
+
+And wire it up in the Player... we'll need to add a few things here...
+
+First, we'll need some way to keep track of the player's velocity:
+
+  class Player
+    def initialize(window)
+      @velocity_x = @velocity_y = @angle = 0.0
+    end
+  end
+
+Let's refactor our x y coordinates while we're at it:
+
+  class Player
+    def initialize(window)
+      @x, @y = 320, 240
+    end
+
+    def draw
+      @image.draw_rot(@x, @y, 0, @angle)
+    end
+  end
+  
+Now we need two methods to make this work the first is 'accelerate':
+  
+  class Player
+    def accelerate
+      @velocity_x += Gosu::offset_x(@angle, 0.18)
+      @velocity_y += Gosu::offset_y(@angle, 0.18)
+    end
+  end
+
+Gosu::offset returns the distance between the origin and the point to which you would get if you moved in the specified angle by the specified distance
+
+If you started this now -- you wouldn't notice any change in behavior -- this is because we're only setting the velocity. We haven't applied it to the ship's x y coordinates yet.
+
+That's where the 'move' method comes in:
+
+  class Player
+    def move
+      @x += @velocity_x
+      @y += @velocity_y
+
+      @velocity_x *= 1
+      @velocity_y *= 1
+    end
+  end
+
+In the first part we're modifying the ship's coordinates based on the velocity calculated in the accelerate method (which is called when you hit 'Up'). The other part calculates the rate of acceleration when there is no player input... 1 would mean constant, no increase or decrease... if you had .98 in there, you'd slow down gradually... 1.2 you'd steadily increase in speed.
+
+There's also something else we need to account for, wrapping of the player when they go off screen. Currently the coordinates would continue to increase until you left screen... that's not very useful in this case.
+
+We need to make it so you wrap around to the other side:
+
+
+  class Player
+    def move
+      @x += @velocity_x
+      @y += @velocity_y
+
+      @x %= 640
+      @y %= 480
+
+      @velocity_x *= 1
+      @velocity_y *= 1
+    end
+  end
+
+We're using modulus to find the remainder and set that as our new x,y -- this will allow you to wrap around the screen.
+
+The last thing we need to do is call Player#move from the main game loop so we can make our ship move based on acceleration:
+
+  class GameWindow < Gosu::Window
+    def update
+      @player.move
+    end
+  end
+
+Now we're calculating the new x,y coordinates of the ship on each pass of the game loop. At this point we should be all set regarding ship control and movement
+
+= Lab_03
+
+* Make your ship move using the techniques discussed since the previous lab
+* Implement the following methods: Player#accelerate, Player#move
+* Call Player#move from the main game loop
+* Experiment with different numbers regarding acceleration
+
+== Asteroids
+
+Now that we can move around, lets add some asteroids to the mix. The first thing we need to do is create a file for all of our asteroid-y goodness:
+
+  touch lib/asteroid.rb
+
+And fill it with the basics (we know it will need x,y,angle,move,draw)... and speed:
+
+  include Math
+
+  class Asteroid
+    def initialize(window)
+      @image = Gosu::Image(window, 'assets/asteroid-large-1.png', false)
+      @x, @y, @angle = rand(640), rand(240), rand(360)
+      @speed_modifier = 2
+    end
+
+    def draw
+      @image.draw_rot(@x, @y, 1, @angle)
+    end
+
+    def move
+      @x += @speed_modifier*Math.sin(Math::PI/180*@angle)
+      @y += -@speed_modifier*Math.cos(Math::PI/180*@angle)
+      @x %= 640
+      @y %= 480
+    end
+  end
+
+You'll notice we ditched velocity -- it's not going to change once the asteroid has spawned so there's no point in calling it out. We'll just set the speed of the object when it's created and call it good. That's what we're calling our @speed_modifier.
+
+You'll also notice that we're using random numbers for @x, @y, and @angle. We want our asteroids to spawn in different places going in different directions.
+
+The other thing you'll notice is the formula we're using the Math library for sine and cosine functions. This is so we can calculate the next x,y coordinates based on speed and angle. This allows us to create a vector on which an asteroid ride. 
+
+The next thing we need to do is make our game aware of the asteroids...
+
+  include 'lib/asteroid'
+
+  class GameWindow < Gosu::Window
+    def initalize
+      @asteroids = [Asteroid.new(self]
+    end
+
+    def update
+      @asteroids.each {|asteroid| asteroid.move}
+    end
+
+    def draw
+      @asteroids.each {|asteroid| asteroid.draw}
+    end
+  end
+
+Now, if everything has gone according to plan, we should have a lone asteroid that spawns in different locations on each game load.
+
+= Lab_04
+
+* Spawn a SINGLE asteroid in a random location in the game window
+* Spawn MULTIPLE asteroids in random locations in the game window
+
+== Collision Detection
+
+Now that we can control the player and we have random moving asteroids -- we can talk about collision detection (also called hit detection).
+
+We need a way to tell if the player has collided with an Asteroid and execute some logic based on that.
+
+First, let's setup a hitbox for Asteroids and for the player (this method will be the same for each):
+
+  def initialize(window)
+    @x, @y = something, something
+    @image = Gosu::Image.new(window, 'asset/path', false)
+  end
+
+  def hitbox
+    hitbox_x = ((@x - @image.width/2).to_i..(@x + @image.width/2.to_i)).to_a
+    hitbox_y = ((@y - @image.width/2).to_i..(@y + @image.width/2).to_i).to_a
+    {:x => hitbox_x, :y => hitbox_y}
+  end
+
+Cool, but what does it do? This collects all of the x/y coordinates contained within the bounds of the image attached to the object. Let's add that method to both our Player and our Asteroid.
+
+Now that we have hitboxes, we need a way to compare them to see if they've overlapped. We'll handle that in our main game object (or in a separate utility library). For now, lets stick with the main game object:
+
+  class GameWindow < Gosu::Window
+    def collision?(object_1, object_2)
+      hitbox_1, hitbox_2 = object_1.hitbox, object_2.hitbox
+      common_x = hitbox_1[:x] & hitbox_2[:x]
+      common_y = hitbox_1[:y] & hitbox_2[:y]
+      common_x.size > 0 && common_y.size > 0 
+    end
+  end
+
+This gathers the two hitboxes from two objects (any object that has the appropriate methods) and then compares them to see if they overlap. The '&' operator will return all of the elements common to both arrays.
+
+This stuff can certainly be optimized but this works for now.
+
+The last step is to actually search for collisions within our game loop:
+
+  class GameWindow < Gosu::Window
+    def update
+      detect_collisions   
+    end
+      
+    def detect_collisions
+      @asteroids.each do |asteroid| 
+        if collision?(asteroid, @player)
+          puts 'kaboom'
+        end
+      end
+    end
+
+    def collision?(object_1, object_2)
+      hitbox_1, hitbox_2 = object_1.hitbox, object_2.hitbox
+      common_x = hitbox_1[:x] & hitbox_2[:x]
+      common_y = hitbox_1[:y] & hitbox_2[:y]
+      common_x.size > 0 && common_y.size > 0 
+    end
+  end
+
+PHEW! That's heavy. Let's see if everyone is on board ;)
+
+= Lab_05
+
+* Create a hitbox method and add it to both Player and Asteroid
+* Create a GameWindow#collision? method that will compare two object's hitboxes
+* Create a GameWindow#detect_collisions method that will iterate through @asteroids to see if there has been a collision with the @player
+* Print out 'kaboom' or 'oblivion' in the console if a collision occurred 
+
+== Projectiles
+
+We have a Player, we have Asteroids, we have Collision Detection... now we need Projectiles. Mmmm, the fun part.
+
+Yes, lets create the files to hold our projectiles:
+
+  touch lib/projectile.rb
+
+And set it up with the standard accoutrements:
+
+  class Projectile
+    def initialize(window, origin_object)
+      @x, @y = origin_object.x, origin_object.y
+      @angle = origin_object.angle
+      @speed_modifier = 7
+      @image = Gosu::Image(window, 'assets/projectlie.png', false)
+    end
+
+    def draw
+      @image.draw_rot(@x, @y, 1, @angle)
+    end
+
+    def move
+      @x += @speed_modifier*Math.sin(Math::PI/180*@angle)
+      @y += -@speed_modifier*Math.cos(Math::PI/180*@angle)
+      @x %= 640
+      @y %= 480
+    end
+
+    def hitbox
+      hitbox_x = ((@x - @image.width/2).to_i..(@x + @image.width/2.to_i)).to_a
+      hitbox_y = ((@y - @image.width/2).to_i..(@y + @image.width/2).to_i).to_a
+      {:x => hitbox_x, :y => hitbox_y}
+    end
+  end
+
+Yeah, starting to notice a pattern here. Extractions should be made, but we can save that for later (hitbox, move, draw, etc -- are the same across multiple object, ripe for refactoring).
+
+The only thing special going on here is the 'origin_object' in the initialize method definition. This is so we can tell where to start the projectile's path. As you can see, we need to expose a few methods on the 'origin_object'.
+
+Expose x, y, angle, on the Player class:
+
+  class Player
+    attr_accessor :x, :y, :angle
+  end
+
+Now let's hook this up to the space button and add the appropriate containers:
+
+  class GameWindow < Gosu::Window
+
+    def initialize
+      @projectiles = []
+    end
+
+    def update
+      @projectiles.each {|projectile| projectile.move}
+    end
+
+    def draw
+      @projectiles.each {|projectile| projectile.draw}
+    end
+
+    def button_down(id)
+      if id == Gosu::KbSpace
+        @projectiles << Projectile.new(self, @player)
+      end
+    end
+  end
+
+Okay, now you should be able to spawn projectiles... but they never disappear, this is a problem. Let's fix that by implementing a max travel distance.
+
+  class Projectile
+    def initialize(window, origin_object)
+      @distance_traveled, @max_distance = 0, 50
+    end
+    
+    def move
+      @distance_traveled += 1
+    end
+  end
+
+Now we have a ticker that's moving up each time the game loop passes. It's more of time-to-live than a distance... but that's fine -- it works for now.
+
+The next thing we need to do is mark the projectile as dead once it's achieved it's max distance:
+
+  class Projectile
+    def initialize(window, origin_object)
+      @distance_traveled, @max_distance = 0, 50
+      @alive = true
+    end
+    
+    def move
+      @distance_traveled += 1
+      kill if @distance_traveled > @max_distance
+    end
+
+    def kill
+      @alive = false
+    end
+
+    def dead?
+      !alive
+    end
+  end
+
+You'll notice that I've added a dash of DSL to make it a bit easier to read. I've also added a convenience method Projectile#dead? -- which will be used in the main game loop.
+
+The next thing that we need to do is cleanup the @projectiles collection in the main game loop so that dead (max traveled) projectiles are removed from the window.
+
+  class GameWindow < Gosu::Window
+    def update
+      @projectiles.reject!{|projectile| projectile.dead?}
+    end
+  end  
+
+At this point you should have projectiles that disappear at a certain interval.
+
+The last part is to simply include @projectiles in GameWindow#detect_collisions
+
+  class GameWindow < Gosu::Window
+    def detect_collisions
+      @projectiles.each do |projectile| 
+        @asteroids.each do |asteroid|
+          if collision?(projectile, asteroid)
+            projectile.kill
+            puts 'hit'
+          end
+        end
+      end
+    end
+  end
+
+You'll notice that we're killing the projectile after it hits an Asteroid...
+
+= Lab_06
+
+* Create a Projectile class
+* Implement max distance
+* Kill the projectile after it reaches max distance
+* Remove dead projectiles from the @projectiles collection
+* Add hit detection for Projectiles vs Asteroids
+
+== Smashing Asteroids
+
+Now that we have hit detection rolling we can handle the smashing of Asteroids. There are 3 types of asteroids in Asteroids: large, medium, and small. Large asteroids smash into two medium asteroids, and the medium asteroid splits into two small asteroids. When a small asteroid is hit, it's removed from the game.
+
+The first step is to kill the asteroids that we currently have - it's going to work the same way as killing projectiles:
+
+  class Asteroid
+    def initialize(window)
+      @alive = true
+    end
+
+    def kill
+      @alive = false
+    end
+
+    def dead?
+      !@alive
+    end
+  end
+
+Then we have to kill on collision detection with a projectile then remove the dead asteroid from the current collection held in the main loop:
+
+  class GameWindow < Gosu::Window
+    def update
+      @asteroids.reject!{|asteroid| asteroid.dead?}
+    end
+
+    def detect_collisions
+      @projectiles.each do |projectile| 
+        @asteroids.each do |asteroid|
+          if collision?(projectile, asteroid)
+            projectile.kill
+            asteroid.kill
+          end
+        end
+      end
+    end
+  end
+
+Now when you shoot an asteroid it disappears, but this is only part of what we want -- now we have to smash the asteroids up in the smaller asteroids.
+
+But first we need to refactor the Asteroid class to recognize different sizes and expose the window object to the rest of the methods in the class:
+
+  class Asteroid
+    def initialize(window, size='large')
+      @window = window
+      @size = size
+      @image = Gosu::Image.new(window, "assets/asteroid-#{size}-1.png", false)
+    end
+  end
+
+We'll default to large so we don't have to go back and change our original implementation.
+
+Now we need to update the Asteroid#kill, #smash, and #setup methods to handle the breaking of asteroids:
+
+class Asteroid
+  def kill
+    @alive = false
+    smash
+  end
+
+  def smash
+    asteroids = case @size
+      when 'large'
+        speed = 2
+        2.times.collect{Asteroid.new(@window, 'medium'}
+      when 'medium'
+        speed = 2.5
+        2.times.collect{Asteroid.new(@window, 'small'}
+      else
+        []
+    end
+    asteroids.collect {|asteroid| asteroid.setup(@x, @y, rand(0)*speed+0.5) }
+  end
+
+  def setup(x, y, speed)
+    @x, @y, @speed_modifier = x, y, speed
+    @angle = rand(360)
+    self
+  end
+end
+
+Then we need to handle the addition of new asteroids to the collection in the main loop:
+
+class GameWindow < Gosu::Window
+  def detect_collisions
+    @projectiles.each do |projectile| 
+      @asteroids.each do |asteroid|
+        if collision?(projectile, asteroid)
+          projectile.kill
+          @asteroids += asteroid.kill
+        end
+      end
+    end
+  end
+end
+
+= Lab_07
+
+* Update Asteroid#kill to handle the smashing of asteroids
+
+== Player Death
+
+Now lets handle the death of a player. First lets add in all the death/kill methods as we did before on other methods:
+
+class Player
+  def initialize
+    @alive = true
+  end
+
+  def kill
+    alive = false
+  end
+  
+  def dead?
+    !@alive
+  end
+end
+
+And handle it in our game loop... (remove the comment, replace it with @player.kill)
+
+class GameWindow < Gosu::Window
+  def update
+    control_player unless @player.dead
+  end
+
+  def draw
+    @player.draw unless @player.dead?
+  end
+
+  def button_down(id)
+    if id == Gosu::KbSpace
+      @projectiles << Projectile.new(self, @player) unless @player.dead?
+    end
+  end
+
+  def detect_collisions
+    @asteroids.each do |asteroid| 
+      if collision?(asteroid, @player)
+        @player.kill
+      end
+    end
+  end
+end
+
+Note that we halt player control once they run out of lives -- this will prevent shots being fired from a ghost ship...
+
+Asteroids just became a touch more serious. Hardcore mode is fun and all but how about we add a few lives to make the game a bit easier:
+
+class Player
+  attr_accessor :lives
+
+  def initialize(window)
+    @lives = 3
+  end
+
+  def kill
+    @lives -= 1
+    @alive = false
+    return if lives <= 0
+    warp
+  end
+
+  def warp(x=320,y=240)
+    @velocity_x = @velocity_y = @angle = 0.0
+    @x, @y = x, y
+    @alive = true
+  end
+end
+
+When a player dies, we subtract a life, then warp them back to the middle of the screen.
+    
+The last thing we need to do is display the number of lives in the game window:
+
+class GameWindow < Gosu::Window
+  def initialize
+    @life_image = Gosu::Image.new(self, "assets/ship.png", false)
+  end
+
+  def draw
+    draw_lives
+  end 
+
+  def draw_lives
+    return unless @player.lives > 0
+    x = 10
+    @player.lives.times do 
+      @life_image.draw(x, 50, 0)
+      x += 20
+    end
+  end
+end
+
+Now you should be able to display lives and have them systematically removed ;)
+
+= Lab_08
+
+* Update your game to handle player deaths.
+* Give your player 3 lives
+* Display the number of lives somewhere on the screen (text or image)
+
+== Scoring
+
+What's a game without a score? Let's implement that now:
+
+  class Player
+    attr_accessor :score
+
+    def initialize(window)
+      @score = 0
+    end
+  end
+
+Now that we can track the score, we need to assign point values to the different asteroid sizes:
+
+  class Asteroid
+    def points
+      case @size
+      when 'large'
+        20
+      when 'medium'
+        50
+      when 'small'
+        100
+      else
+        0
+      end
+    end
+  end
+
+And then update detect_collisions to handle the scoring:
+
+  class GameWindow < Gosu::Window
+    def detect_collisions
+      @projectiles.each do |projectile| 
+        @asteroids.each do |asteroid|
+          if collision?(projectile, asteroid)
+            projectile.kill
+            @player.score += asteroid.points
+            @asteroids += asteroid.kill
+          end
+        end
+      end
+    end
+  end
+  
+Then we simply need to display the score on screen:
+
+  class GameWindow < Gosu::Window
+    def initialize
+      @font = Gosu::Font.new(self, 'Inconsolata-dz', 24)
+    end
+
+    def draw
+      @font.draw(@player.score, 10, 10, 50, 1.0, 1.0, 0xffffffff)
+    end
+  end
+
+Font.new(window, font-name, size)
+@font.draw('text', x, y, z, factor_x, factor_y, color)
+
+At this point you should be able to see your points adding up as you blast away asteroids.
+
+= Lab_09
+
+* Add Player#score 
+* Give point values to Asteroids based on their size
+* Tally the score in GameWindow#detect_collisions
+
+== Levels
+
+Now that we've setup scoring and lives -- we need to setup levels. Once all of the asteroids are cleared, we need to spawn a new set with an additional large asteroid.
+
+class GameWindow < Gosu::Window
+  def initialize
+    @level = 1
+    @initial_asteroid_count = 3
+    @asteroids = Asteroid.spawn(self, @initial_asteroid_count)
+  end
+  
+  def update
+    next_level if @asteroids.size == 0 
+  end
+    
+  def next_level
+    @initial_asteroid_count += 1
+    @asteroids = Asteroid.spawn(self, @initial_asteroid_count) 
+  end
+end
+
+The only thing left is to display the current level on the screen:
+
+class GameWindow < Gosu::Window
+  def update
+    @font.draw(@level, 610, 10, 50, 1.0, 1.0, 0xffffffff)
+  end
+end
+
+= Lab_10
+
+* Increment the level once all asteroids have been cleared
+* Increment the number of asteroids by one
+* Spawn new asteroids
+* Display level on screen
+
+== Title screen
+
+Now we have most of the game complete but we're still missing the title screen.
+
+  class GameWindow < Gosu::Window
+    def initialize
+      @game_in_progress = false
+      title_screen
+    end
+
+    def title_screen
+      @asteroids = Asteroid.spawn(self, 4)
+      @asteroids += @asteroids[0].kill
+      @asteroids += @asteroids[1].kill
+      @asteroids += @asteroids.last.kill
+    end
+
+    def setup_game
+      @player = Player.new(self)
+      @level = 1
+      @asteroid_count = 3
+      @asteroids = Asteroid.spawn(self, @asteroid_count)
+      @projectiles = []
+      @game_in_progress = true
+    end
+
+    def update
+      if button_down? Gosu::KbQ
+        close
+      end
+
+      if button_down? Gosu::KbS
+        setup_game unless @game_in_progress
+      end   
+
+      return unless @game_in_progress
+
+      #... other stuff
+    end
+
+    def draw
+      unless @game_in_progress
+        @font.draw("ASTEROIDS", 175, 120, 50, 2.8, 2.8, 0xffffffff)
+        @font.draw("press 's' to start", 210, 320, 50, 1, 1, 0xffffffff)
+        @font.draw("press 'q' to quit", 216, 345, 50, 1, 1, 0xffffffff)
+      end
+      return unless @game_in_progress
+      
+      #... other stuff
+    end
+  end
+
+Be sure to move the asteroids logic above 'return unless @game_in_progress' to be sure that the background asteroids (for the title screen) will be rendered.
+
+We also added text input to control exiting the application "Q"
+
+= Lab_11
+
+* Extract game setup out into another method
+* Set a flag for game_in_progress (that flips when you press 's')
+* Draw title with instructions
+* Press 's' to start the game
+
+== Game Over
+
+The last thing we need to implement is a game over screen.
+
+  class GameWindow < Gosu::Window
+    def draw
+      if @lives <= 0
+        @font.draw("GAME OVER", 200, 150, 50, 2.0, 2.0, 0xffffffff)
+        @font.draw("press 'r' to restart", 195, 320, 50, 1, 1, 0xffffffff)
+        @font.draw("press 'q' to quit", 210, 345, 50, 1, 1, 0xffffffff)
+      end
+    end
+  end
+
+We should also implement a way to restart the game once you're killed:
+
+  class GameWindow < Gosu::Window
+    def update
+      if button_down? Gosu::KbR
+        title_screen unless @game_in_progress == false
+        @game_in_progress = false
+      end
+    end
+  end
+
+= Lab_12
+
+* Implement Game Over screen
+* Implement restart button
 
