@@ -1,4 +1,4 @@
-= Building an SMS Server
+= RUBY AND SMS
 
   Ruby Intrigue
   Lone Star Ruby Conference 2010
@@ -103,7 +103,7 @@ Need to impost limits to make sure messages are properly truncated?
   SMSFu.deliver(“5558675309”, “at&t”, “hello”, :limit => 128)
 
 
-= Labs
+= IT'S LAB TIME
 
 == Lab 01
 
