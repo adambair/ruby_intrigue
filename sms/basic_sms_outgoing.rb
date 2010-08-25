@@ -30,8 +30,8 @@ ActionMailer::Base.smtp_settings = {
    :port => 587,
    :domain => "gmail.com",
    :authentication => :plain,
-   :user_name => "username",  # don't put "@gmail.com"
-   :password => "password",
+   :user_name => "thebrendanlim",  # don't put "@gmail.com"
+   :password => "nu11p0int3r",
    :enable_starttls_auto => true }
 
 class SMSBasic
@@ -59,7 +59,7 @@ class SMSBasic
   end
 end
 
-SMSDispatcher.send(
+SMSBasic.send(
   :number => ARGV[0], 
   :carrier => ARGV[1], 
   :message => ARGV[2]

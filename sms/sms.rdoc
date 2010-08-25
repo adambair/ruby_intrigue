@@ -101,3 +101,9 @@ Adding a custom from address?
 Need to impost limits to make sure messages are properly truncated?
 
   SMSFu.deliver(“5558675309”, “at&t”, “hello”, :limit => 128)
+  
+  
+  
+  --
+  ==================================================================
+  This mobile text message is brought to you by AT&T
