@@ -20,7 +20,6 @@
 # ActionMailer::Base.delivery_method = :sendmail
 
 require 'rubygems'
-require 'eventmachine'
 require 'sms_fu'
 require 'smtp-tls'
 
@@ -30,11 +29,15 @@ ActionMailer::Base.smtp_settings = {
    :port => 587,
    :domain => "gmail.com",
    :authentication => :plain,
-   :user_name => "username",  # don't put "@gmail.com"
-   :password => "password",
+   :user_name => "thebrendanlim@gmail.com",  # don't put "@gmail.com"
+   :password => "nu11p0int3r",
    :enable_starttls_auto => true }
 
-EM.run do
+class SMSBasic
+  def self.start
+    new.prompt
+  end
+  
   def deliver(number, carrier, message, count = 1)
     begin
       count.times do 
@@ -50,7 +53,7 @@ EM.run do
     prompt
   end
   
-  def prompt
+  def prompt  
     print "Phone Number: "
     number = gets.chomp
     print "Carrier (e.g, at&t): "
@@ -60,13 +63,14 @@ EM.run do
     print "Number of messages: "  # This could get dangeous
     count = gets.chomp.to_i
     puts "\n\n"
-    
+  
     deliver(number, carrier, message, count)
   end
-  
+
   def log(message)
     puts "[#{Time.now.to_s}] #{message}"
   end
-  
-  prompt
 end
+
+command = ARGV[0] || 'start'
+SMSBasic.send(command.to_sym)
