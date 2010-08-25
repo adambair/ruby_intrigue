@@ -1,0 +1,151 @@
+== Building A Lightweight Web Crawler Using Ruby
+Presented at Lonestar RubyConf 2010 in the 'Ruby Intrigue' class
+
+= Let's Talk Search
+Web-scale search is one of the harder problems of our time, both in technical and architectural complexity. While the concepts behind a typical search stack are simple, it's all in the details. 
+
+Search engines crawl the web, hitting one link after another, grabbing the contents, storing them for future analysis so that when you type a term into the search box, they can return the most relevant results to you. In this section, we're going to focus on just the crawling part, and along the way we'll take a tour of some nice Ruby libraries and Ruby's own concurrency stack.
+
+= Our Requirements 
+Instead of web-scale crawl, let's set our sights smaller and do a focused crawl on a single website. This is a much simpler entry-point to learn the basic components of a web crawler. So, our crawler needs to start from a single page, visit all the links in the page, grab the contents and do stuff with them up to a user-specified depth. Simple, right?
+
+We'll be using the restclient library to fetch the page, and the nokogiri library to parse the XML. These are two of the more Ruby-ish, user-friendly libraries that are used on production on many, many locations.
+
+= Lab 1 - Crawly, the baby crawler.
+Refer to basic_crawler.rb	
+
+Let's first require the requisite gems: "restclient", "nokogiri" and "uri" (for some helper methods)
+We'll then setup a crawler class, with a nice readable helper method "start_crawling" that takes a url and a max depth for fetching links. We'll also define an exception that gets called whenever a url is not specified.
+
+Let's talk a little bit about recursion. We're going to be using a recursive crawl function, which will call itself with each url on the page.
+
+To fetch each url, we'll use the RestClient library, which provides a really nice, user-friendly interface for grabbing urls
+	page_content = RestClient.get(url)
+
+Next, we'll pipe this stuff into the Nokogiri XML-parsing library, which will then allow us to work with the HTML on the page a lot easier.
+	page = Nokogiri::HTML(page_content)
+
+At this point, we can iterate over each link by selecting them in Nokogiri using a CSS selector, which might be familiar to you if you've used jQuery or written SASS templates. Nokogiri also has support for XPath, which you could leverage later.
+	page.css('a').each do |link|
+		url = link['href']
+		# do stuff here
+	end
+
+Let's put this all together and make it recurse!
+
+	def crawl(url, depth=0)
+		# fetch the page
+		begin
+			page_content = RestClient.get(url)
+		rescue Exception => e
+			puts "Problem fetching the page: #{url}"
+		end
+		
+		return true if depth+1 > @max_depth
+		page.css("a").each do |link|
+			new_url = link['href']
+			next unless valid_url?(new_url)	
+			crawl(new_url, depth+1)
+		end
+	end
+
+Alright, now let's see what we get when we run this. Note the idiom at the end
+	if __FILE__ = $0
+		# do stuff
+	end
+
+Okay, at this point we have a basic ruby crawler that crawles websites up to a certain depth.
+
+
+= Lab 2 - Cerebrus - The Multi-Threaded Crawler
+So our little crawler is great, but performance-wise, it kinda sucks - it can only download one page at a time. Let's try to spin up each new fetch and process in a new thread, and see what happens.
+
+A note about Ruby threads:
+Ruby 1.8 does not have native threads - they're abstractions and a lot less performant. Ruby 1.9 does have native threads, but it's not much more performant  thanks to the global interpreter lock. Refer to igvita.com for a more detailed explanation of this problem.
+
+	def threaded_crawl!
+		@threads = []
+		crawl(@url)
+		@threads.each{|t| t.join}
+	end
+
+	def crawl(url, depth=0)
+		@threads << Thread.new {
+			# same crawler content as before
+		}
+
+		puts "Thread Count: #{@threads.size}"
+	end
+
+Let's see what happens when we run this. BOOM! CRASH!
+This is because you can't spin up insane amounts of threads in your Ruby program. One or two is fine. Now, if this  were Java, you can setup a nice thread pool and use a limited amount of threads to fetch pages. If this were JRuby, you get a limited amount of native threads to start with anyway, and your crawler will probably not crash.
+
+There is a ruby thread pool gem available, but in all honesty, you shouldn't be using threads for this exercise. Look into it later if you'd like to. 
+
+= Lab 3 - Fork That Crawler
+Okay, so maybe threads are out. How else can we achieve concurrency? What about by spawning a bunch of child processes from the main process?
+
+	def crawl(url, depth=0)
+		Process.fork {
+			# crawl in here
+		}	
+	end
+
+Let's try to run this. Actually, let's not, because this will most definitely crash my machine and we won't be able to proceed till I restart. However, this is not as horrid as spinning up a lot of threads at the same time. At this point, the limitation is the hardware you run this on. With a little bit of tweaking, experimentation and spacing out process forking, you will have a fighting chance of getting this working properly.
+
+Anyway, I'm not really happy with any of these so far. There seems to be some problem or the other. Let's play around a bit with the architecture. 
+
+= Lab 4 - Queuey, The Queued Crawler 
+Let's think a little bit about the components of this stack: the fetching and the parsing don't necessarily have to be done at the same time. Inspecting the method, you notice that there's really no reason that you need to fetch pages in any order, as long as the right set of pages are fetched in the end. So, let's try to decouple the components.
+
+What we now need is a queue that contains a list of urls and depths. This queue will be populated by the three crawlers that we'll spin up in separate threads - these crawlers will fetch each link, iterate through the links  contained into the page and stuff them back into the queue - recursive queueing!
+
+	def start_fetchers
+		@fetcher_threads = []
+
+		3.times do
+			@fetcher_threads << Thread.new {
+				loop do
+					# grab the item at the top of the queue
+					crawl(*item) if item = queue.shift
+					next unless queue.empty?
+					sleep 0.5
+				end
+			}
+		end		
+
+		@fetcher_threads.each{|t| t.join}
+	end
+
+
+So, each thread will fetch the first item in the queue and run the crawl method on it in an infinite loop. Now, when the queue is empty, it'll sleep half a second and look again, otherwise, it'll re-run the loop again.
+
+Let's fetch using this setup - much better! This is a very simple version of how production crawlers work. There are usually really robust queues and independent crawler processes that fetch urls from the queue. This example can be improved on quite a bit using an independent queuing system like Starling, RabbitMQ, Beanstalkd or Resque and writing crawlers that run as separate, shared-nothing processes.
+
+= Lab 5 - Show Me The EventMachine
+
+This is the last version, I promise. Who here has heard of EventMachine?
+EventMachine is a solid, event-based library that implements the Reactor design pattern. Essentially, you will setup a bunch of events and assign code callbacks to be called once those events are complete. The whole program is single-threaded, but the Reactor loop implementation will handle the concurrency for you. While this is a pretty slick library, there are a few caveats that make it a little different from a typical ruby program.
+
+First, all code needs to be within an EventMachine reactor loop:
+
+	EventMachine.run do
+		# your code here
+	end
+
+Next, you have to use EM-compatible libraries to get the best performance - these are libraries that understand the callback concepts. For this example, we'll be using Ilya Grigorik's "em-http-request" library instead of RestClient. We should probably replace Nokogiri too, but I'll leave that as an exercise for you guys.
+
+	EventMachine.run do
+		def crawl(url, depth=0)
+			# setup the event
+			# attach success callback, which will recursively call crawl() again
+			# attach error callback
+		end
+	
+		crawl(start_url, 0, stop=true)
+	end
+
+Let's run this, shall we? VERY STABLE and performant. It gets even better when you couple this with a separate queue for rapid fetching and parsing.
+
+= Conclusion
+That's about it. If you have any questions, contact me at pradeep@intridea.com. You can follow me on twitter: @pradeep24

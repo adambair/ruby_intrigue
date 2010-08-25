@@ -7,7 +7,7 @@ require 'nokogiri'
 
 EM.run do
   MAX_DEPTH = 2
-  def crawl(url, depth=0, stop=false)
+  def crawl(url, depth=0)
     uri = URI.parse(url)
     _fetched_url = "http://#{uri.host}#{uri.path}"
 
@@ -47,6 +47,6 @@ EM.run do
     end
   end
 
-  crawl(ARGV[0], 0, stop=true)
+  crawl(ARGV[0], 0)
 end
 
