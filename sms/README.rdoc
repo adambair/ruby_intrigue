@@ -333,7 +333,7 @@ First, let's create the base for our SMSImporter class.
   require 'tmail'
   require 'mms2r'
   require 'eventmachine'
-
+  
   class SMSImporter
     def initialize
       @server   = "imap.gmail.com"
@@ -360,7 +360,7 @@ First, let's create the base for our SMSImporter class.
       puts "#{Time.now.to_s}: #{message}"
     end
   end
-
+  
   command = ARGV[0] || 'start'
   SMSImporter.send(command.to_sym)  
 
