@@ -109,17 +109,25 @@ Let's see sms_fu in action.  First, make sure that you have sms_fu installed.  N
 
 To see how sms_fu actually works, we need to make sure we know how it actually creates these e-mailable addresses.
 
+First, let's require 'rubygems' and the 'sms_fu' gem.
+
   require 'rubygems'
   require 'sms_fu'
+
+Next, let's iterate over SMSFu.carriers and log out the carrier information and the e-mail that will be formed from a phone number and carrier.
 
   SMSFu.carriers.each do |carrier|
     puts "\n#{carrier[1]['name']} [#{carrier[0]}]"
     puts SMSFu.sms_address("123-456-7890", carrier[0])
   end
 
+Then, let's just do a simple count on the number of carriers that sms_fu suppports.
+
   puts "\n#{SMSFu.carriers.count} carriers"
   
-You can also see that sms_fu supports quite a large amount of carriers.  US and International.  
+Let's save and then run it.  
+
+You should see how these addresses are formed.  Also, uou can also see that sms_fu supports quite a large amount of carriers - US and International.  
 
 == Lab 02 - Delivering an SMS
 
@@ -204,7 +212,7 @@ Now, let's setup a basic class definition.
     end
   end
   
-We have this stub for a deliver method.  Let's create a deliver method that takes in three parameters: number, carrier, and message.
+We have this stub for a deliver method.  Let's create an instance method called 'deliver' that takes in three parameters: number, carrier, and message.
   
   def deliver(number, carrier, message)
     begin
