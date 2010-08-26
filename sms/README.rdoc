@@ -55,9 +55,9 @@ If we've ever e-mailed ourselves using SMS we can see that a message from them w
   5558675309@txt.att.net
   
 We can easily break this down now.  We have the number at the front and at the end of the address 
-we have the SMS e-mail address.  This very address can be used to send SMS messages to them as well.
+we have the carrier address.  This very address can be used to send SMS messages to them as well.
 
-This is how SMS Fu works.
+This is how sms_fu works.
 
 == Installing sms_fu
 
