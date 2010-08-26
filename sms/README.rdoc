@@ -349,19 +349,17 @@ Let's create an initialize method that sets up our configuration for our IMAP se
 
 Then add a 'start' class method that creates a new instance of SMSImporter and calls the 'start' *instance* method.  Within this start instance method, let's setup EventMachine and add a periodic timer that should be executed every 10 seconds -- which will call a method called setup_imap.
 
-def self.start
-  new.start
-end
-
-def start
-  EM.run do 
-    EM::add_periodic_timer(10) { 
-      setup_imap
-    }
+  def self.start
+    new.start
   end
-end
 
-
+  def start
+    EM.run do 
+      EM::add_periodic_timer(10) { 
+        setup_imap
+      }
+    end
+  end
 
 Remember, this is just essentially an e-mail importer.  Next, what we should add our 'setup_imap' method.  This will actually make a new IMAP connection and search for new e-mails.  Let's also add in some basic error handling, just in case.
 
