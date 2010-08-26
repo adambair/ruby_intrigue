@@ -341,8 +341,8 @@ Let's create an initialize method that sets up our configuration for our IMAP se
   class SMSImporter
     def initialize
       @server   = "imap.gmail.com"
-      @username = "thebrendanlim@gmail.com" # Full e-mail needed
-      @password = "nu11p0int3r"
+      @username = "YOU@gmail.com" # Full e-mail needed
+      @password = "password"
       @port     = 993
       @folder   = "INBOX"
       @ssl      = true
