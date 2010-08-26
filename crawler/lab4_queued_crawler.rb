@@ -32,7 +32,7 @@ class QueuedCrawler
 
   def start_crawler
     #Thread.new { crawl(@url) }
-    queue.push([url, 0]
+    queue.push([@url, 0])
   end
 
   def start_fetchers
