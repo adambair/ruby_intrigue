@@ -86,5 +86,4 @@ class SMSImporter
   end
 end
 
-command = ARGV[0] || 'start'
-SMSImporter.send(command.to_sym)
+SMSImporter.start

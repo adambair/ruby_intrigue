@@ -324,9 +324,7 @@ In this lab we're going to be dealing with pulling back e-mails via IMAP and pro
 
 First, let's create the base for our SMSImporter class.  
 
-Let's create an initialize method that sets up our configuration for our IMAP settings.  
-
-Then make a 'start' class method that creates a new instance of SMSImporter and calls the 'start' *instance* method.  Within this start instance method, let's setup EventMachine and add a periodic timer that should be executed every 10 seconds -- which will call a method called setup_imap.
+Let's create an initialize method that sets up our configuration for our IMAP settings.  Also, let's add our default log method that we've been using.
 
   require 'rubygems'
   require 'net/imap'
@@ -344,25 +342,26 @@ Then make a 'start' class method that creates a new instance of SMSImporter and 
       @ssl      = true
     end
   
-    def self.start
-      new.start
-    end
-  
-    def start
-      EM.run do 
-        EM::add_periodic_timer(10) { 
-          setup_imap
-        }
-      end
-    end
-  
     def log(message)
       puts "#{Time.now.to_s}: #{message}"
     end
   end
 
-  command = ARGV[0] || 'start'
-  SMSImporter.send(command.to_sym)
+Then add a 'start' class method that creates a new instance of SMSImporter and calls the 'start' *instance* method.  Within this start instance method, let's setup EventMachine and add a periodic timer that should be executed every 10 seconds -- which will call a method called setup_imap.
+
+def self.start
+  new.start
+end
+
+def start
+  EM.run do 
+    EM::add_periodic_timer(10) { 
+      setup_imap
+    }
+  end
+end
+
+
 
 Remember, this is just essentially an e-mail importer.  Next, what we should add our 'setup_imap' method.  This will actually make a new IMAP connection and search for new e-mails.  Let's also add in some basic error handling, just in case.
 
@@ -440,7 +439,11 @@ Underneath the tmail line, add the following.
 
 I'm just checking for 'sms' in the body since I don't want to purge all of your e-mails.  Change it to something more specific if you like.
 
-Now, to run this, let's run our outgoing SMS script.  Make sure that the reply to address is the same address that's within your SMSImporter class.  Reply back to that SMS with the message 'sms'.  Then, run the SMS Importer.  If all went well, you should see the SMS Importer processing your reply.
+Lastly, outside of the class definition, on the bottom, add the following line to start the importer when we run it.
+
+  SMSImporter.start
+
+Now, to run this and actually get some results back, let's first run our outgoing SMS script.  Make sure that the reply to address is the same address that's within your SMSImporter class.  Reply back to that SMS with the message 'sms'.  Then, run the SMS Importer.  If all went well, you should see the SMS Importer processing your reply.
 
 Here's the importer in its entirety.
 
@@ -527,5 +530,4 @@ Here's the importer in its entirety.
     end
   end
 
-  command = ARGV[0] || 'start'
-  SMSImporter.send(command.to_sym)
+  SMSImporter.start
