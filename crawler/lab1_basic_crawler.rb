@@ -52,5 +52,5 @@ class Crawler
 end
 
 if __FILE__ == $0
-  Crawler.start_crawling :url => ARGV[0], :depth => 2 
+  Crawler.start_crawling :url => ARGV[0], :depth => ARGV[1].to_i 
 end

@@ -45,7 +45,7 @@ class MultiThreadedCrawler
       end
     }
 
-    puts "Thread COUNT: #{@threads.size}"
+#    puts "Thread COUNT: #{@threads.size}"
   end
 
   def log(message, depth=0)
@@ -64,7 +64,7 @@ class MultiThreadedCrawler
 end
 
 if __FILE__ == $0
-  MultiThreadedCrawler.start_crawling(:url => ARGV[0], :depth => 2)
+  MultiThreadedCrawler.start_crawling(:url => ARGV[0], :depth => ARGV[1].to_i)
 end
 
 # This crawler spins up each fetch & process in a separate thread. Crashes horribly as expected
