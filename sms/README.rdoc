@@ -324,30 +324,30 @@ In this lab we're going to be dealing with pulling back e-mails via IMAP and pro
 
 First, let's create the base for our SMSImporter class.  
 
-* Let's create an initialize method that sets up our configuration for our IMAP settings.  
+Let's create an initialize method that sets up our configuration for our IMAP settings.  
 
-* Then make a 'start' class method that creates a new instance of SMSImporter and calls the 'start' *instance* method.  Within this start instance method, let's setup EventMachine and add a periodic timer that should be executed every 10 seconds -- which will call a method called setup_imap.
+Then make a 'start' class method that creates a new instance of SMSImporter and calls the 'start' *instance* method.  Within this start instance method, let's setup EventMachine and add a periodic timer that should be executed every 10 seconds -- which will call a method called setup_imap.
 
   require 'rubygems'
   require 'net/imap'
   require 'tmail'
   require 'mms2r'
   require 'eventmachine'
-  
+
   class SMSImporter
     def initialize
       @server   = "imap.gmail.com"
-      @username = "email@domain.com" # Full e-mail needed
-      @password = "password"
+      @username = "thebrendanlim@gmail.com" # Full e-mail needed
+      @password = "nu11p0int3r"
       @port     = 993
       @folder   = "INBOX"
       @ssl      = true
     end
-
+  
     def self.start
       new.start
     end
-
+  
     def start
       EM.run do 
         EM::add_periodic_timer(10) { 
@@ -355,14 +355,14 @@ First, let's create the base for our SMSImporter class.
         }
       end
     end
-
+  
     def log(message)
       puts "#{Time.now.to_s}: #{message}"
     end
   end
-  
+
   command = ARGV[0] || 'start'
-  SMSImporter.send(command.to_sym)  
+  SMSImporter.send(command.to_sym)
 
 Remember, this is just essentially an e-mail importer.  Next, what we should add our 'setup_imap' method.  This will actually make a new IMAP connection and search for new e-mails.  Let's also add in some basic error handling, just in case.
 
