@@ -11,8 +11,8 @@ require 'eventmachine'
 class SMSImporter
   def initialize
     @server   = "imap.gmail.com"
-    @username = "thebrendanlim@gmail.com" # Full e-mail needed
-    @password = "nu11p0int3r"
+    @username = "username@gmail.com" # Full e-mail needed
+    @password = "password"
     @port     = 993
     @folder   = "INBOX"
     @ssl      = true
