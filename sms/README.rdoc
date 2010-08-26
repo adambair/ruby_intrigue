@@ -416,6 +416,33 @@ Alright, now let's replace what we have in that else block in the check_for_new_
     process_email(email, message_id, imap)
   end
 
+We're calling a fetch with the message_id and looking for the RFC822 attribute.  We want to grab the first item out of the array and call then grab the RFC822 attribute, which will return the body.
+
+Here's a list of all of the valid attribute values.
+
+  BODY
+      A form of BODYSTRUCTURE without extension data. 
+  BODY[<section>]<<origin_octet>>
+      A string expressing the body contents of the specified section. 
+  BODYSTRUCTURE
+      An object that describes the [MIME-IMB] body structure of a message. See Net::IMAP::BodyTypeBasic, Net::IMAP::BodyTypeText, Net::IMAP::BodyTypeMessage, Net::IMAP::BodyTypeMultipart. 
+  ENVELOPE
+      A Net::IMAP::Envelope object that describes the envelope structure of a message. 
+  FLAGS
+      A array of flag symbols that are set for this message. flag symbols are capitalized by String#capitalize. 
+  INTERNALDATE
+      A string representing the internal date of the message. 
+  RFC822
+      Equivalent to BODY[]. 
+  RFC822.HEADER
+      Equivalent to BODY.PEEK[HEADER]. 
+  RFC822.SIZE
+      A number expressing the [RFC-822] size of the message. 
+  RFC822.TEXT
+      Equivalent to BODY[TEXT]. 
+  UID
+      A number expressing the unique identifier of the message
+
 Now, lastly let's create this new process_email method that we introduced.
 
   def process_email(email, message_id, imap)
