@@ -19,6 +19,7 @@ class Crawler
   end
 
   def crawl(url, depth=0)
+    exit if $interrupted 
     begin
       page_content = RestClient.get(url) 
     rescue Exception
@@ -52,5 +53,7 @@ class Crawler
 end
 
 if __FILE__ == $0
+  trap("INT") { $interrupted = true }
+  $interrupted = false
   Crawler.start_crawling :url => ARGV[0], :depth => ARGV[1].to_i 
 end
