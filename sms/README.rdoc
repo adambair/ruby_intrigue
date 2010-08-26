@@ -172,7 +172,9 @@ After we're done with this setup, let's setup some basic variables to store the 
 
 Here comes the exciting part.  Let's take what we have and add in the following line to actually deliver an SMS.
 
-  SMSFu.deliver(number,carrier,message)
+  if __FILE__ == $0
+    SMSFu.deliver(number,carrier,message)
+  end
   
 It's up to you to choose the "victim" of your SMS.  I highly suggest using yourself so that you can actually see the results.  
 
@@ -233,12 +235,14 @@ You see here we're calling a method called log.  This will be used for some basi
 
 Alright, now outside of our SMSSender class definition, add the following at the bottom.  This will take our command-line arguments and pass them through to the class method, send.  
 
-  SMSSender.send(
-    :number => ARGV[0], 
-    :carrier => ARGV[1], 
-    :message => ARGV[2]
-  )
-  
+  if __FILE__ == $0
+    SMSSender.send(
+      :number => ARGV[0], 
+      :carrier => ARGV[1], 
+      :message => ARGV[2]
+    )
+  end  
+
 Let's run this.  We can do this by doing.
 
   ruby name_of_file.rb "123-457-7890" "at&t" "hello world!"
@@ -312,7 +316,9 @@ Let's create this deliver method.
 
 Now, the last thing we should do is call SMSSpammer.start outside of the class definition.
 
-  SMSSpammer.start
+  if __FILE__ == $0
+    SMSSpammer.start
+  end
 
 Let's try it out.  It should immediately prompt the user for all the info that it needs to get the job done.  
 
@@ -439,7 +445,9 @@ I'm just checking for 'sms' in the body since I don't want to purge all of your 
 
 Lastly, outside of the class definition, on the bottom, add the following line to start the importer when we run it.
 
-  SMSImporter.start
+  if __FILE__ == $0
+    SMSImporter.start
+  end
 
 Now, to run this and actually get some results back, let's first run our outgoing SMS script.  Make sure that the reply to address is the same address that's within your SMSImporter class.  Reply back to that SMS with the message 'sms'.  Then, run the SMS Importer.  If all went well, you should see the SMS Importer processing your reply.
 
@@ -528,4 +536,6 @@ Here's the importer in its entirety.
     end
   end
 
-  SMSImporter.start
+  if __FILE__ == $0
+    SMSImporter.start
+  end

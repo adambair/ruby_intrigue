@@ -20,16 +20,16 @@ class SMSImporter
   def start
     EM.run do 
       EM::add_periodic_timer(10) { 
-        setup_imap(@server, @port, @username, @password, @folder, @ssl) 
+        setup_imap
       }
     end
   end
   
-  def setup_imap(server, port, username, password, folder, ssl)
+  def setup_imap
     begin
-      imap = Net::IMAP::new(server, port, ssl)
-      imap.login(username, password)
-      imap.select(folder)
+      imap = Net::IMAP::new(@server, @port, @ssl)
+      imap.login(@username, @password)
+      imap.select(@folder)
       mail_items = imap.search(["NOT", "SEEN"])
       check_for_new_mail(mail_items, imap)
     rescue Net::IMAP::NoResponseError => e
@@ -59,5 +59,6 @@ class SMSImporter
   end
 end
 
-command = ARGV[0] || 'start'
-SMSImporter.send(command.to_sym)
+if __FILE__ == $0
+  SMSImporter.start
+end

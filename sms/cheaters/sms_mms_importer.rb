@@ -86,4 +86,6 @@ class SMSImporter
   end
 end
 
-SMSImporter.start
+if __FILE__ == $0
+  SMSImporter.start
+end

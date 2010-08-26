@@ -72,5 +72,6 @@ class SMSBasic
   end
 end
 
-command = ARGV[0] || 'start'
-SMSBasic.send(command.to_sym)
+if __FILE__ == $0
+  SMSBasic.start
+end

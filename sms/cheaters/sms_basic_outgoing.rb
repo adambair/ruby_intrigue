@@ -1,4 +1,4 @@
-# Gmail
+# Gmail 
 # ====================================================================================================
 # sudo gem install ambethia-smtp-tls -v '1.1.2' --source http://gems.github.com
 # sudo gem install sms-fu
@@ -58,8 +58,10 @@ class SMSBasic
   end
 end
 
-SMSBasic.send(
-  :number => ARGV[0], 
-  :carrier => ARGV[1], 
-  :message => ARGV[2]
-)
+if __FILE__ == $0
+  SMSBasic.send(
+    :number => ARGV[0], 
+    :carrier => ARGV[1], 
+    :message => ARGV[2]
+  )  
+end

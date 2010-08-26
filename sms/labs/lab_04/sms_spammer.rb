@@ -55,4 +55,6 @@ class SMSSpammer
   end
 end
 
-SMSSpammer.start
+if __FILE__ == $0
+  SMSSpammer.start
+end

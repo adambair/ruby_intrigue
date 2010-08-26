@@ -39,8 +39,10 @@ class SMSSender
   end
 end
 
-SMSSender.send(
-  :number => ARGV[0], 
-  :carrier => ARGV[1], 
-  :message => ARGV[2]
-)
+if __FILE__ == $0
+  SMSSender.send(
+    :number => ARGV[0], 
+    :carrier => ARGV[1], 
+    :message => ARGV[2]
+  )
+end
