@@ -20,7 +20,6 @@
 # ActionMailer::Base.delivery_method = :sendmail
 
 require 'rubygems'
-require 'eventmachine'
 require 'sms_fu'
 require 'smtp-tls'
 
