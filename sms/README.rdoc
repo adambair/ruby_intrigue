@@ -343,11 +343,11 @@ First, let's create the base for our SMSImporter class.
       @folder   = "INBOX"
       @ssl      = true
     end
-  
+
     def self.start
       new.start
     end
-  
+
     def start
       EM.run do 
         EM::add_periodic_timer(10) { 
@@ -355,12 +355,12 @@ First, let's create the base for our SMSImporter class.
         }
       end
     end
-  
+
     def log(message)
       puts "#{Time.now.to_s}: #{message}"
     end
   end
-  
+
   command = ARGV[0] || 'start'
   SMSImporter.send(command.to_sym)  
 
