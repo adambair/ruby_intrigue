@@ -247,6 +247,8 @@ Let's run this.  We can do this by doing.
 
 Cool, now we've got something legit that we can use anywhere to deliver SMS messages.  Let's make something fun.  What we want to do is make something that prompts our user for what number, carrier, and message they want to send.  We'll also take it one step further and ask them how many times they want to send this message.  Now, as a disclaimer, nobody is responsible for any damage/harm/legal action/etc that comes from this.  It's all on you buddy.  
 
+Alright, let's grab our requires and our ActionMailer settings from the previous examples.
+
   require 'rubygems'
   require 'sms_fu'
   require 'smtp-tls'
@@ -261,48 +263,58 @@ Cool, now we've got something legit that we can use anywhere to deliver SMS mess
      :password => "password",
      :enable_starttls_auto => true }
 
+Now, let's create a basic SMSSpammer class with a 'start' class method and a basic method for logging.
+
   class SMSSpammer
     def self.start
       new.prompt
     end
-  
-    def deliver(number, carrier, message, count = 1)
-      begin
-        count.times do 
-          SMSFu.deliver(number,carrier,message)
-          log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
-        end
-      rescue Errno::ECONNREFUSED => e
-        log("Connection refused: " + e.message)
-      rescue Exception => e
-        log("Exception " + e.message)
-      end
-      puts "\n\n"
-      prompt
-    end
-  
-    def prompt  
-      print "Phone Number: "
-      number = gets.chomp
-      print "Carrier (e.g, at&t): "
-      carrier = gets.chomp
-      print "Message: "
-      message = gets.chomp
-      print "Number of messages: "  # This could get dangeous
-      count = gets.chomp.to_i
-      puts "\n\n"
-  
-      deliver(number, carrier, message, count)
-    end
-
+    
     def log(message)
       puts "[#{Time.now.to_s}] #{message}"
     end
   end
 
+You can see that the start method creates a new instance of the SMSSpammer class and then calls the instance method 'prompt'.  Let's create this prompt method.
+
+  def prompt  
+    print "Phone Number: "
+    number = gets.chomp
+    print "Carrier (e.g, at&t): "
+    carrier = gets.chomp
+    print "Message: "
+    message = gets.chomp
+    print "Number of messages: "  # This could get dangerous
+    count = gets.chomp.to_i
+    puts "\n\n"
+
+    deliver(number, carrier, message, count)
+  end
+
+This method will prompt the user for a number, carrier, message, and (gasp), the number of messages to send.  Then, it will need to call a method called deliver to actually send these messages.
+
+Let's create this deliver method.
+
+  def deliver(number, carrier, message, count = 1)
+    begin
+      count.times do 
+        SMSFu.deliver(number,carrier,message)
+        log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
+      end
+    rescue Errno::ECONNREFUSED => e
+      log("Connection refused: " + e.message)
+    rescue Exception => e
+      log("Exception " + e.message)
+    end
+    puts "\n\n"
+    prompt
+  end
+
+Now, the last thing we should do is call SMSSpammer.start outside of the class definition.
+
   SMSSpammer.start
 
-Once run, it should immediately prompt the user for all the info that it needs to get the job done.
+Let's try it out.  It should immediately prompt the user for all the info that it needs to get the job done.  
 
 == Lab 05 - Building an SMS / MMS Importer
 
@@ -310,13 +322,20 @@ We've done the whole outgoing SMS thing and that was pretty easy.  Now, we're go
 
 In this lab we're going to be dealing with pulling back e-mails via IMAP and processing these items back by using MMS2R.  We're also going to be introducing a little bit of EventMachine in this lab as well.
 
-First, let's create the base for our SMSImporter class.
+First, let's create the base for our SMSImporter class.  
+
+* Let's create an initialize method that sets up our configuration for our IMAP settings.  
+
+* Then make a 'start' class method that creates a new instance of SMSImporter and calls the 'start' *instance* method.  Within this start instance method, let's setup EventMachine and add a periodic timer that should be executed every 10 seconds -- which will call a method called setup_imap.
 
   require 'rubygems'
   require 'net/imap'
+  require 'tmail'
+  require 'mms2r'
+  require 'eventmachine'
 
   class SMSImporter
-    def initialize(options = {})
+    def initialize
       @server   = "imap.gmail.com"
       @username = "email@domain.com" # Full e-mail needed
       @password = "password"
@@ -332,16 +351,9 @@ First, let's create the base for our SMSImporter class.
     def start
       EM.run do 
         EM::add_periodic_timer(10) { 
-          setup_imap(@server, @port, @username, @password, @folder, @ssl) 
+          setup_imap
         }
       end
-    end
-  
-    def setup_imap(server, port, username, password, folder, ssl)
-      imap = Net::IMAP::new(server, port, ssl)
-      imap.login(username, password)
-      imap.select(folder)
-      mail_items = imap.search(["NOT", "SEEN"])
     end
   
     def log(message)
@@ -351,16 +363,14 @@ First, let's create the base for our SMSImporter class.
 
   command = ARGV[0] || 'start'
   SMSImporter.send(command.to_sym)  
-  
-Remember, this is just essentially an e-mail importer.  Next, what we should do is add some error handling.
 
-Change your setup_imap method to handle some nasty IMAP errors that you could possibly run into.
+Remember, this is just essentially an e-mail importer.  Next, what we should add our 'setup_imap' method.  This will actually make a new IMAP connection and search for new e-mails.  Let's also add in some basic error handling, just in case.
 
-  def setup_imap(server, port, username, password, folder, ssl)
+  def setup_imap
     begin
-      imap = Net::IMAP::new(server, port, ssl)
-      imap.login(username, password)
-      imap.select(folder)
+      imap = Net::IMAP::new(@server, @port, @ssl)
+      imap.login(@username, @password)
+      imap.select(@folder)
       mail_items = imap.search(["NOT", "SEEN"])
     rescue Net::IMAP::NoResponseError => e
       log("#{e.class} - Command sent to server could not be completed successfully: #{e.message}")
@@ -378,7 +388,7 @@ Change your setup_imap method to handle some nasty IMAP errors that you could po
   
 The next thing we should do is actually do something with this mail_items variable that we have.  Let's create a new method to check to see if there's actually anything new within here.
 
-Underneath mail_items = .... let's add the following
+Underneath the 'mail_items = ....' line, let's add the following:
 
   check_for_new_mail(mail_items, imap)
   
@@ -388,11 +398,11 @@ Then, let's create a new method called check_for_new_mail that accepts these par
     if mail_items.empty?
       log("There are currently no e-mails to process.")
     else
-      log("We've got mail")
+      log("We've got mail!")
     end
   end
 
-Cool, now if we actually run this file now, it should check and let us know if we have mail or not.
+Now if we actually run this it should check our mail via IMAP and let us know if we have mail or not.
 
 Let's take a minute to try this out.
 
@@ -438,12 +448,13 @@ Here's the importer in its entirety.
   require 'net/imap'
   require 'tmail'
   require 'mms2r'
+  require 'eventmachine'
 
   class SMSImporter
-    def initialize(options = {})
+    def initialize
       @server   = "imap.gmail.com"
-      @username = "email@domain.com" # Full e-mail needed
-      @password = "password"
+      @username = "thebrendanlim@gmail.com" # Full e-mail needed
+      @password = "nu11p0int3r"
       @port     = 993
       @folder   = "INBOX"
       @ssl      = true
@@ -456,18 +467,17 @@ Here's the importer in its entirety.
     def start
       EM.run do 
         EM::add_periodic_timer(10) { 
-          setup_imap(@server, @port, @username, @password, @folder, @ssl) 
+          setup_imap
         }
       end
     end
   
-    def setup_imap(server, port, username, password, folder, ssl)
+    def setup_imap
       begin
-        imap = Net::IMAP::new(server, port, ssl)
-        imap.login(username, password)
-        imap.select(folder)
+        imap = Net::IMAP::new(@server, @port, @ssl)
+        imap.login(@username, @password)
+        imap.select(@folder)
         mail_items = imap.search(["NOT", "SEEN"])
-        check_for_new_mail(mail_items, imap)
       rescue Net::IMAP::NoResponseError => e
         log("#{e.class} - Command sent to server could not be completed successfully: #{e.message}")
         log(e.backtrace.join("\n"))
