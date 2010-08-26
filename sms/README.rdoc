@@ -75,8 +75,6 @@ sms_fu relies on a yaml file contains a list of carriers and their e-mail SMS ad
     value:@tmomail.net
   ...
 
-You can edit this sms_fu.yml file and add your own carriers in the same format.  SMS Fu currently supports a large list of carriers within the US and Internationally.
-
 Some International carriers actually make this e-mail to SMS solution a paid feature.  So, if you plan on sending text messages to anybody that's in a situation like this, make sure that they know that they might have to subscribe to an e-mail to SMS solution with their carrier.
 
 == Reply-To/From Address
@@ -86,7 +84,7 @@ Well, since it is an e-mail, we will have to specify an e-mail address that can 
   config:
     from_address:noreply@domain.com
     
-By default, this is what sms_fu.yml has set for the reply-to address.  This can be modified in sms_fu.yml but can also be overridden when we deliver an SMS -- which is what we'll do in a later example.
+By default, this is what sms_fu.yml has set for the reply-to address.  This can be modified in sms_fu.yml but can also be overridden when we deliver an SMS -- which is what I'll describe in just a minute.
 
 == Delivering SMS Messages
 
@@ -107,21 +105,29 @@ Need to impost limits to make sure messages are properly truncated?
 
 == Lab 01 - Carriers
 
-Let's see sms_fu in action.  First, make sure that you have sms_fu installed.  Now, bring up your favorite editor, Vim, Emacs, TextMate, Notepad, Microsoft Word (...).
+Let's see sms_fu in action.  First, make sure that you have sms_fu installed.  Now, bring up your favorite editor, Vim, Emacs, TextMate, Notepad, Microsoft Word (...i hope not).
 
 To see how sms_fu actually works, we need to make sure we know how it actually creates these e-mailable addresses.
 
+First, let's require 'rubygems' and the 'sms_fu' gem.
+
   require 'rubygems'
   require 'sms_fu'
+
+Next, let's iterate over SMSFu.carriers and log out the carrier information and the e-mail that will be formed from a phone number and carrier.
 
   SMSFu.carriers.each do |carrier|
     puts "\n#{carrier[1]['name']} [#{carrier[0]}]"
     puts SMSFu.sms_address("123-456-7890", carrier[0])
   end
 
+Then, let's just do a simple count on the number of carriers that sms_fu suppports.
+
   puts "\n#{SMSFu.carriers.count} carriers"
   
-You can also see that sms_fu supports quite a large amount of carriers.  US and International.  
+Let's save and then run it.  
+
+You should see how these addresses are formed.  Also, uou can also see that sms_fu supports quite a large amount of carriers - US and International.  
 
 == Lab 02 - Delivering an SMS
 
@@ -129,18 +135,26 @@ How about we actually deliver a quick SMS?
 
 First, if you don't have an e-mail address you can use, make one.  We'll also be using this e-mail address later to pull back incoming e-mails sent back via SMS.  
 
-I know that almost all of us have Gmail addresses.  Gmail's a little finicky when it comes to SMTP.  Install the smtp-tls gem.
+I know that almost all of us have Gmail addresses.  Gmail's a little finicky when it comes to SMTP.  Install the smtp-tls gem so that we can send out SMS's using our Gmail accounts.
 
   sudo gem install ambethia-smtp-tls -v '1.1.2' --source http://gems.github.com
   
 Now that you have that setup, we can go ahead and get started writing this.
 
+First, make sure to require rubygems and all the other necessary gems.
+
   require 'rubygems'
-  require 'eventmachine'
   require 'sms_fu'
   require 'smtp-tls'
+  
+We're then going to need to set up our ActionMailer config.  We didn't need to explicitly require 'actionmailer' since sms_fu does this already.  
+
+Let's set our delivery method to :smtp.
 
   ActionMailer::Base.delivery_method = :smtp
+
+Next, we're going to actually add in our SMTP settings. 
+
   ActionMailer::Base.smtp_settings = {
      :address => "smtp.gmail.com",
      :port => 587,
@@ -149,22 +163,32 @@ Now that you have that setup, we can go ahead and get started writing this.
      :user_name => "username",  # don't put "@gmail.com"
      :password => "password",
      :enable_starttls_auto => true }
+
+After we're done with this setup, let's setup some basic variables to store the number we're going to send an SMS, the carrier, and the message.
 
   number  = "123-456-7890"
   carrier = "at&t"
   message = "hello world"
 
+Here comes the exciting part.  Let's take what we have and add in the following line to actually deliver an SMS.
+
   SMSFu.deliver(number,carrier,message)
   
 It's up to you to choose the "victim" of your SMS.  I highly suggest using yourself so that you can actually see the results.  
 
-== Lab 03 - Basic SMSSender
+Now, let's take our app, save it and run it.
 
-Now that we've sent our own basic SMS, let's make a little script to make this more usable.  We're going to want to be able to take in three parameters from the command line.  These arguments are going to be the number, carrier, and the message.  We'll also throw in some error handling in there as well as some logging.  
+== Lab 03 - Basic SMSSender Class
+
+Now that we've sent our own basic SMS, let's turn this into its own class.  We're going to want to be able to take in three parameters from the command line.  These command-line arguments are going to be the number, carrier, and the message.  We'll also throw in some error handling in there as well as some logging.  
+
+First, make sure to do our requires ...
 
   require 'rubygems'
   require 'sms_fu'
   require 'smtp-tls'
+
+Next, grab your old config from the previous example and paste it in.
 
   ActionMailer::Base.delivery_method = :smtp
   ActionMailer::Base.smtp_settings = {
@@ -175,6 +199,8 @@ Now that we've sent our own basic SMS, let's make a little script to make this m
      :user_name => "username",  # don't put "@gmail.com"
      :password => "password",
      :enable_starttls_auto => true }
+
+Now, let's setup a basic class definition.
 
   class SMSSender
     def self.send(options = {})
@@ -184,22 +210,28 @@ Now that we've sent our own basic SMS, let's make a little script to make this m
     def initialize(options = {})
       deliver(options[:number], options[:carrier], options[:message])
     end
+  end
   
-    def deliver(number, carrier, message)
-      begin
-        SMSFu.deliver(number,carrier,message)
-        log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
-      rescue Errno::ECONNREFUSED => e
-        log("Connection refused: " + e.message)
-      rescue Exception => e
-        log("Exception " + e.message)
-      end
-    end
+We have this stub for a deliver method.  Let's create an instance method called 'deliver' that takes in three parameters: number, carrier, and message.
   
-    def log(message)
-      puts "[#{Time.now.to_s}] #{message}"
+  def deliver(number, carrier, message)
+    begin
+      SMSFu.deliver(number,carrier,message)
+      log("Delivered \"#{message}\" to #{SMSFu.sms_address(number,carrier)}")
+    rescue Errno::ECONNREFUSED => e
+      log("Connection refused: " + e.message)
+    rescue Exception => e
+      log("Exception " + e.message)
     end
   end
+
+You see here we're calling a method called log.  This will be used for some basic logging.
+  
+  def log(message)
+    puts "[#{Time.now.to_s}] #{message}"
+  end
+
+Alright, now outside of our SMSSender class definition, add the following at the bottom.  This will take our command-line arguments and pass them through to the class method, send.  
 
   SMSSender.send(
     :number => ARGV[0], 
