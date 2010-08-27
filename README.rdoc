@@ -30,5 +30,5 @@ Ruby Intrigue is highly interactive and works best with lively participation and
 
 At the end of the day you'll walk away with multiple working applications and an enhanced awareness of the possibilities that lie beyond the domain of web frameworks.
 
-(c) 2010, Intridea Inc.
-The code and outlines for the 'Ruby Intrigue' talk given at the Lone Star Ruby Conference in Austin, Texas.
+  (c) 2010, Intridea Inc.
+  The code and outlines for the 'Ruby Intrigue' talk given at the Lone Star Ruby Conference in Austin, Texas.
