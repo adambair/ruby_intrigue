@@ -1,6 +1,35 @@
 =Ruby Intrigue
 
-Code for the 'Ruby Intrigue' talk given at Lonestar 2010
-Presented by: Adam Bair, Pradeep Elankumaran & Brendan Lim
+The code and outline for the 'Ruby Intrigue' talk given at the Lone Star Ruby Conference in Austin, Texas.
+
+= Ruby Intrigue
+Adam Bair, Brendan Lim, Pradeep Elankumaran
+
+Sick of writing web applications with Ruby? Curious about the possibilities? Yeah, we thought so. There's more to life than whipping up RESTful CRUD applications in Rails. Together we'll expand our Ruby horizons while writing a web crawler, a game, and an SMS server. We'll also discuss coding practices and methodologies along the way.
+
+==Crawler
+
+* Nokogiri
+* single/multi-threaded
+* event machine
+* smacksale.com
+
+==Asteroids
+
+* Gosu framework
+* window configuration
+* interaction with a player
+* player interaction with objects
+
+==SMS
+
+* sms_fu
+* delivering SMS
+* dealing with carriers
+* consuming SMS via email
+
+Ruby Intrigue is highly interactive and works best with lively participation and questions. Due to the lab intensive nature of this tutorial students should come equipped with a laptop (or semi-portable computer) configured with a suitable development environment.
+
+At the end of the day you'll walk away with multiple working applications and an enhanced awareness of the possibilities that lie beyond the domain of web frameworks.
 
 (c) 2010, Intridea Inc.
