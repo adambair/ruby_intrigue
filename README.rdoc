@@ -2,8 +2,7 @@
 
 The code and outline for the 'Ruby Intrigue' talk given at the Lone Star Ruby Conference in Austin, Texas.
 
-= Ruby Intrigue
-Adam Bair, Brendan Lim, Pradeep Elankumaran
+Presented by Adam Bair, Brendan Lim, Pradeep Elankumaran
 
 Sick of writing web applications with Ruby? Curious about the possibilities? Yeah, we thought so. There's more to life than whipping up RESTful CRUD applications in Rails. Together we'll expand our Ruby horizons while writing a web crawler, a game, and an SMS server. We'll also discuss coding practices and methodologies along the way.
 
