@@ -110,13 +110,9 @@ You should see how these addresses are formed.  Also, uou can also see that sms_
 
 How about we actually deliver a quick SMS?  
 
-First, if you don't have an e-mail address you can use, make one.  We'll also be using this e-mail address later to pull back incoming e-mails sent back via SMS.  
+First, if you don't have an e-mail address you can use, make one.  We'll also be using this e-mail address later to pull back incoming e-mails sent back via SMS. 
 
-Instead of ActionMailer, let's use the Pony gem.  You can still use ActionMailer (>= 3.0.0rc2) if you wish but we're going to use Pony gor these examples.  If you don't have Pony, install it by doing:
-
-  sudo gem install pony
-  
-Now that you have that setup, we can go ahead and get started writing this.
+Instead of ActionMailer, let's use the Pony method for delivery.  You can still use ActionMailer (>= 3.0.0rc2) if you wish but we're going to use Pony for these examples.
 
 First, make sure to require rubygems and all the other necessary gems.
 
