@@ -59,9 +59,10 @@ we have the carrier address.  This very address can be used to send SMS messages
 
 This is how sms_fu works.
 
-== Installing sms_fu
+== Setting up sms_fu
 
-  sudo gem install sms_fu 
+  sudo gem install sms_fu
+  sudo gem install pony -v=1.0
 
 == Dealing with Carriers
 
@@ -85,7 +86,7 @@ Let's see sms_fu in action.  First, make sure that you have sms_fu installed.  N
 
 To see how sms_fu actually works, we need to make sure we know how it actually creates these e-mailable addresses.
 
-First, let's require 'rubygems', and the 'sms_fu' gem.
+First, let's require 'rubygems', and the 'sms_fu'.
 
   require 'rubygems'
   require 'sms_fu'
