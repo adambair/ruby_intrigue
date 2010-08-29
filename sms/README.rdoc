@@ -61,7 +61,7 @@ This is how sms_fu works.
 
 == Setting up sms_fu
 
-  sudo gem install sms_fu
+  sudo gem install sms_fu -v=1.1.1
   sudo gem install pony -v=1.0
 
 == Dealing with Carriers
