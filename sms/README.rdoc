@@ -145,7 +145,13 @@ Here comes the exciting part.  Let's take what we have and add in the following 
     sms_fu = SMSFu::Client.configure(:delivery => :pony, :pony_config => PONY_CONFIG)
     sms_fu.deliver(number,carrier,message)
   end
-  
+
+If you wish to use ActionMailer instead of Pony, you can remove the PONY_CONFIG and replace the client setup line with:
+
+  sms_fu = SMSFu::Client.configure(:delivery => :action_mailer)
+
+SMS Fu requires the newest version of ActionMailer (>= 3.0.0rc2)  
+
 It's up to you to choose the "victim" of your SMS.  I highly suggest using yourself so that you can actually see the results.  
 
 Now, let's take our app, save it and run it.
